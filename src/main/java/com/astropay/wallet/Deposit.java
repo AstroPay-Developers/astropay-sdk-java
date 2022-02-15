@@ -30,20 +30,22 @@ public class Deposit {
     private Currency currency;
     private String country;
     private String merchant_deposit_id;
+    private String deposit_external_id;
     private String callback_url;
     private String redirect_url; //optional
     private User user;
     private Product product;
     private VisualInfo visualInfo; //optional
     private static final String requestURL = "https://%env.astropay.com/merchant/v1/deposit/init";
+    private static final String getStatusURL = "https://%env.astropay.com/merchant/v1/deposit/%deposit_external_id/status";
 
     //using java.net.http.HttpClient
     public void init() {
         if (this.apiKey == null || this.secretKey == null) {
             throw new Error("You must provide API-Key and Secret Key");
         }
-        String url = requestURL.replace("%env", this.sandbox ? "onetouch-api-sandbox" : "onetouch-api");
-
+        String depositURL = requestURL.replace("%env", this.sandbox ? "onetouch-api-sandbox" : "onetouch-api");
+        System.out.println(depositURL);
         System.out.println("Calling Astropay Deposit");
 
         String bodyRequest = "{" +
@@ -76,7 +78,7 @@ public class Deposit {
 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(requestURL))
+                .uri(URI.create(depositURL))
                 .timeout(Duration.ofMinutes(2))
                 .headers(
                         "Content-Type", "application/json",
@@ -100,15 +102,44 @@ public class Deposit {
         DepositResponse depositResponse = g.fromJson(result, DepositResponse.class);
 
         // check if listener is registered.
-        if (this.depositResultListener == null) {
-            System.out.println("Register to registerDepositResultEventListener");
-        } else {
+        if (this.depositResultListener != null) {
             if (depositResponse.getError() != null) {
                 depositResultListener.OnDepositError(depositResponse);
             } else {
+                this.deposit_external_id = depositResponse.getDeposit_external_id();
                 depositResultListener.OnDepositSuccess(depositResponse);
             }
         }
+    }
+
+    public void checkDepositStatus() {
+        String statusURL = getStatusURL.replace("%env", this.sandbox ? "onetouch-api-sandbox" : "onetouch-api");
+        statusURL = statusURL.replace("%deposit_external_id", this.deposit_external_id);
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest get = HttpRequest.newBuilder()
+                .uri(URI.create(statusURL))
+                .timeout(Duration.ofMinutes(2))
+                .headers(
+                        "Content-Type", "application/json",
+                        "Merchant-Gateway-Api-Key", this.apiKey
+                )
+                .GET()
+                .build();
+
+        CompletableFuture<HttpResponse<String>> response =
+                client.sendAsync(get, HttpResponse.BodyHandlers.ofString());
+
+        String result = null;
+        try {
+            result = response.thenApply(HttpResponse::body).get(5, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            e.printStackTrace();
+        }
+
+        Gson g = new Gson();
+        DepositResponse statusResponse = g.fromJson(result, DepositResponse.class);
+
+        System.out.println(statusResponse);
     }
 
     // setting the listener
