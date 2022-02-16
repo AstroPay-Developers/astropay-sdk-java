@@ -1,6 +1,6 @@
 package com.astropay.resources;
 
-import com.astropay.Astropay;
+import com.astropay.AstroPay;
 import com.google.gson.Gson;
 
 import javax.crypto.Mac;
@@ -40,11 +40,11 @@ public class Deposit {
 
     //using java.net.http.HttpClient
     public void init() {
-        if (this.apiKey == null || Astropay.SDK.getSecretKey() == null) {
+        if (this.apiKey == null || AstroPay.Sdk.getSecretKey() == null) {
             throw new Error("You must provide API-Key and Secret Key");
         }
         String depositURL = requestURL.replace("%env", this.sandbox ? "onetouch-api-sandbox" : "onetouch-api");
-        System.out.println("Calling Astropay Deposit");
+        System.out.println("Calling AstroPay Deposit");
 
         String bodyRequest = "{" +
                 "\"amount\": " + this.amount + "," +
@@ -69,7 +69,7 @@ public class Deposit {
                 "}";
         String hash = null;
         try {
-            hash = toHexString(calcHmacSha256(Astropay.SDK.getSecretKey().getBytes(StandardCharsets.UTF_8), bodyRequest.getBytes(StandardCharsets.UTF_8)));
+            hash = toHexString(calcHmacSha256(AstroPay.Sdk.getSecretKey().getBytes(StandardCharsets.UTF_8), bodyRequest.getBytes(StandardCharsets.UTF_8)));
         } catch (Exception e) {
             e.printStackTrace();
         }
