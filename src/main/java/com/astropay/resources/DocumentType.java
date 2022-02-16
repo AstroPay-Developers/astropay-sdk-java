@@ -1,4 +1,4 @@
-package com.astropay.wallet;
+package com.astropay.resources;
 
 public enum DocumentType {
     CI,

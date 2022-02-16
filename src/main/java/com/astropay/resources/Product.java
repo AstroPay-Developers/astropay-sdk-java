@@ -1,4 +1,4 @@
-package com.astropay.wallet;
+package com.astropay.resources;
 
 public class Product {
     private String mcc;

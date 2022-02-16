@@ -1,4 +1,4 @@
-package com.astropay.wallet;
+package com.astropay.resources;
 
 public interface DepositResultListener {
     void OnDepositSuccess(DepositResponse depositResponse);

@@ -1,4 +1,4 @@
-package com.astropay.wallet;
+package com.astropay.resources;
 
 public class VisualInfo {
     private String merchant_name;

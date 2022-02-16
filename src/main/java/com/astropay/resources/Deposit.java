@@ -1,5 +1,6 @@
-package com.astropay.wallet;
+package com.astropay.resources;
 
+import com.astropay.Astropay;
 import com.google.gson.Gson;
 
 import javax.crypto.Mac;
@@ -22,10 +23,8 @@ import java.util.concurrent.TimeoutException;
 
 public class Deposit {
     private DepositResultListener depositResultListener;
-    private static HttpURLConnection connection;
     private boolean sandbox = false;
     private String apiKey;
-    private String secretKey;
     private BigDecimal amount;
     private Currency currency;
     private String country;
@@ -41,7 +40,7 @@ public class Deposit {
 
     //using java.net.http.HttpClient
     public void init() {
-        if (this.apiKey == null || this.secretKey == null) {
+        if (this.apiKey == null || Astropay.SDK.getSecretKey() == null) {
             throw new Error("You must provide API-Key and Secret Key");
         }
         String depositURL = requestURL.replace("%env", this.sandbox ? "onetouch-api-sandbox" : "onetouch-api");
@@ -54,7 +53,7 @@ public class Deposit {
                 "\"country\": \"" + this.country + "\"," +
                 "\"merchant_deposit_id\": \"" + this.merchant_deposit_id + "\"," +
                 "\"callback_url\": \"" + this.callback_url + "\"," +
-                "\"redirect_url\": \" " + this.callback_url + "\"," +
+                "\"redirect_url\": \" " + this.redirect_url + "\"," +
                 "\"user\": {\n" +
                 "    \"merchant_user_id\": \"" + this.user.getMerchant_user_id() +
                 "\"}\n," +
@@ -71,7 +70,7 @@ public class Deposit {
                 "}";
         String hash = null;
         try {
-            hash = toHexString(calcHmacSha256(this.secretKey.getBytes(StandardCharsets.UTF_8), bodyRequest.getBytes(StandardCharsets.UTF_8)));
+            hash = toHexString(calcHmacSha256(Astropay.SDK.getSecretKey().getBytes(StandardCharsets.UTF_8), bodyRequest.getBytes(StandardCharsets.UTF_8)));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -193,10 +192,6 @@ public class Deposit {
     //region Setters
     public void setApiKey(String apiKey) {
         this.apiKey = apiKey;
-    }
-
-    public void setSecretKey(String secretKey) {
-        this.secretKey = secretKey;
     }
 
     public void setSandbox(boolean sandbox) {
