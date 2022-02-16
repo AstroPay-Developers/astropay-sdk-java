@@ -44,7 +44,6 @@ public class Deposit {
             throw new Error("You must provide API-Key and Secret Key");
         }
         String depositURL = requestURL.replace("%env", this.sandbox ? "onetouch-api-sandbox" : "onetouch-api");
-        System.out.println(depositURL);
         System.out.println("Calling Astropay Deposit");
 
         String bodyRequest = "{" +
@@ -138,7 +137,7 @@ public class Deposit {
         Gson g = new Gson();
         DepositResponse statusResponse = g.fromJson(result, DepositResponse.class);
 
-        System.out.println(statusResponse);
+        depositResultListener.OnStatusResult(statusResponse);
     }
 
     // setting the listener
