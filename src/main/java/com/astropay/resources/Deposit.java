@@ -1,6 +1,7 @@
 package com.astropay.resources;
 
 import com.astropay.AstroPay;
+import com.astropay.exceptions.APException;
 import com.google.gson.Gson;
 
 import javax.crypto.Mac;
@@ -38,17 +39,25 @@ public class Deposit {
     private static final String requestURL = "https://%env.astropay.com/merchant/v1/deposit/init";
     private static final String getStatusURL = "https://%env.astropay.com/merchant/v1/deposit/%deposit_external_id/status";
 
-    //using java.net.http.HttpClient
-    public void init() {
+    public Deposit(User user, Product product) {
+        this.user = user;
+        this.product = product;
+    }
+
+    /**
+     * Used to initiate a user deposit
+     *
+     * @throws APException APBase Exception
+     */
+    public void init() throws APException {
         if (this.apiKey == null || AstroPay.Sdk.getSecretKey() == null) {
-            throw new Error("You must provide API-Key and Secret Key");
+            throw new APException("You must provide API-Key and Secret Key");
         }
         String depositURL = requestURL.replace("%env", this.sandbox ? "onetouch-api-sandbox" : "onetouch-api");
-        System.out.println("Calling AstroPay Deposit");
 
         String bodyRequest = "{" +
                 "\"amount\": " + this.amount + "," +
-                "\"currency\": \"" + this.getCurrency() + "\"," +
+                "\"currency\": \"" + this.currency + "\"," +
                 "\"country\": \"" + this.country + "\"," +
                 "\"merchant_deposit_id\": \"" + this.merchant_deposit_id + "\"," +
                 "\"callback_url\": \"" + this.callback_url + "\"," +
@@ -57,14 +66,14 @@ public class Deposit {
                 "    \"merchant_user_id\": \"" + this.user.getMerchant_user_id() +
                 "\"}\n," +
                 "\"product\": {\n" +
-                "    \"mcc\": 7995,\n" +
-                "    \"category\": \"test_deposit\",\n" +
-                "    \"merchant_code\": \"test\",\n" +
-                "    \"description\": \"wallet deposit\"\n" +
+                "    \"mcc\": \"" + this.product.getMcc() + "\",\n" +
+                "    \"category\": \"" + this.product.getCategory() + "\",\n" +
+                "    \"merchant_code\": \"" + this.product.getMerchant_code() + "\",\n" +
+                "    \"description\": \"" + this.product.getDescription() + "\"\n" +
                 "    },\n" +
                 "\"visual_info\": {\n" +
                 "    \"merchant_name\": \"" + this.visualInfo.getMerchant_name() + "\",\n" +
-                "    \"merchant_logo\": \"https://getapp.astropaycard.com/img/astropay-logo.png\"\n" +
+                "    \"merchant_logo\": \"" + this.visualInfo.getMerchant_logo() + "\"\n" +
                 "    }\n" +
                 "}";
         String hash = null;
@@ -72,28 +81,26 @@ public class Deposit {
             hash = toHexString(calcHmacSha256(AstroPay.Sdk.getSecretKey().getBytes(StandardCharsets.UTF_8), bodyRequest.getBytes(StandardCharsets.UTF_8)));
         } catch (Exception e) {
             e.printStackTrace();
+            throw new APException(this.getMerchant_deposit_id(), "There was an error in the method signature");
         }
 
         HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(depositURL))
-                .timeout(Duration.ofMinutes(2))
-                .headers(
-                        "Content-Type", "application/json",
-                        "Merchant-Gateway-Api-Key", this.apiKey,
-                        "Signature", hash
-                )
-                .POST(HttpRequest.BodyPublishers.ofString(bodyRequest))
-                .build();
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(depositURL)).timeout(Duration.ofMinutes(2)).headers("Content-Type", "application/json", "Merchant-Gateway-Api-Key", this.apiKey, "Signature", hash).POST(HttpRequest.BodyPublishers.ofString(bodyRequest)).build();
 
-        CompletableFuture<HttpResponse<String>> response =
-                client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
+        CompletableFuture<HttpResponse<String>> response = client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
 
         String result = null;
         try {
             result = response.thenApply(HttpResponse::body).get(5, TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+        } catch (InterruptedException e) {
             e.printStackTrace();
+            throw new APException(this.getMerchant_deposit_id(), "Thread is interrupted, either before or during the activity");
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+            throw new APException(this.getMerchant_deposit_id(), "ExecutionException caused by: " + e.getCause(), e);
+        } catch (TimeoutException e) {
+            e.printStackTrace();
+            throw new APException(this.getMerchant_deposit_id(), "Timeout Exception", e);
         }
 
         Gson g = new Gson();
@@ -110,22 +117,18 @@ public class Deposit {
         }
     }
 
-    public void checkDepositStatus() {
+    /**
+     * Request made in order to find out the status of a deposit
+     *
+     * @param deposit_external_id Deposit external ID
+     */
+    public void checkDepositStatus(String deposit_external_id) {
         String statusURL = getStatusURL.replace("%env", this.sandbox ? "onetouch-api-sandbox" : "onetouch-api");
-        statusURL = statusURL.replace("%deposit_external_id", this.deposit_external_id);
+        statusURL = statusURL.replace("%deposit_external_id", deposit_external_id);
         HttpClient client = HttpClient.newHttpClient();
-        HttpRequest get = HttpRequest.newBuilder()
-                .uri(URI.create(statusURL))
-                .timeout(Duration.ofMinutes(2))
-                .headers(
-                        "Content-Type", "application/json",
-                        "Merchant-Gateway-Api-Key", this.apiKey
-                )
-                .GET()
-                .build();
+        HttpRequest get = HttpRequest.newBuilder().uri(URI.create(statusURL)).timeout(Duration.ofMinutes(2)).headers("Content-Type", "application/json", "Merchant-Gateway-Api-Key", this.apiKey).GET().build();
 
-        CompletableFuture<HttpResponse<String>> response =
-                client.sendAsync(get, HttpResponse.BodyHandlers.ofString());
+        CompletableFuture<HttpResponse<String>> response = client.sendAsync(get, HttpResponse.BodyHandlers.ofString());
 
         String result = null;
         try {
@@ -140,7 +143,11 @@ public class Deposit {
         depositResultListener.OnStatusResult(statusResponse);
     }
 
-    // setting the listener
+    /**
+     * Register listener
+     *
+     * @param mListener Deposit Result Listener
+     */
     public void registerDepositResultEventListener(DepositResultListener mListener) {
         this.depositResultListener = mListener;
     }
@@ -188,7 +195,18 @@ public class Deposit {
         return toHexString(sha256_HMAC.doFinal(data.getBytes(StandardCharsets.UTF_8)));
     }
 
+    /**
+     * @return merchant_deposit_id Unique identifier of transaction
+     */
+    public String getMerchant_deposit_id() {
+        return merchant_deposit_id;
+    }
+
     //region Setters
+
+    /**
+     * @param apiKey merchant API-Key
+     */
     public void setApiKey(String apiKey) {
         this.apiKey = apiKey;
     }
@@ -197,14 +215,16 @@ public class Deposit {
         this.sandbox = sandbox;
     }
 
+    /**
+     * @param amount Deposit Amount, Type: BigDecimal
+     */
     public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
 
-    public Currency getCurrency() {
-        return currency;
-    }
-
+    /**
+     * @param currency Deposit Currency, Type: Currency
+     */
     public void setCurrency(Currency currency) {
         this.currency = currency;
     }
@@ -214,10 +234,6 @@ public class Deposit {
             throw new Error("Country must be String (2) ISO Code");
         }
         this.country = country;
-    }
-
-    public String getMerchant_deposit_id() {
-        return merchant_deposit_id;
     }
 
     public void setMerchant_deposit_id(String merchant_deposit_id) {
