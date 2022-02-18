@@ -26,7 +26,7 @@ public class Deposit {
     private DepositResultListener depositResultListener;
     private boolean sandbox = false;
     private BigDecimal amount;
-    private Currency currency;
+    private String currency;
     private String country;
     private String merchantDepositId;
     private String depositExternalId;
@@ -190,16 +190,16 @@ public class Deposit {
     }
 
     /**
-     * @param amount Deposit Amount, Type: BigDecimal
+     * @param amount Deposit Amount as BigDecimal
      */
     public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
 
     /**
-     * @param currency Deposit Currency, Type: Currency
+     * @param currency Deposit Currency as String
      */
-    public void setCurrency(Currency currency) {
+    public void setCurrency(String currency) {
         this.currency = currency;
     }
 
