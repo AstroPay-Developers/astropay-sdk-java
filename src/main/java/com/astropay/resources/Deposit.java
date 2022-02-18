@@ -30,8 +30,8 @@ public class Deposit {
     private String country;
     private String merchantDepositId;
     private String depositExternalId;
-    private String callbackUrl;
-    private String redirectUrl; //optional
+    private URL callbackUrl;
+    private URL redirectUrl; //optional
     private User user;
     private Product product;
     private VisualInfo visualInfo; //optional
@@ -214,11 +214,11 @@ public class Deposit {
         this.merchantDepositId = merchantDepositId;
     }
 
-    public void setCallbackUrl(String callbackUrl) {
+    public void setCallbackUrl(URL callbackUrl) {
         this.callbackUrl = callbackUrl;
     }
 
-    public void setRedirectUrl(String redirectUrl) {
+    public void setRedirectUrl(URL redirectUrl) {
         this.redirectUrl = redirectUrl;
     }
 

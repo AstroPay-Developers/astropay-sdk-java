@@ -1,10 +1,12 @@
 package com.astropay.resources;
 
+import java.net.URL;
+
 public class VisualInfo {
     private final String merchantName;
-    private final String merchantLogo;
+    private final URL merchantLogo;
 
-    public VisualInfo(String merchantName, String merchantLogo) {
+    public VisualInfo(String merchantName, URL merchantLogo) {
         this.merchantName = merchantName;
         this.merchantLogo = merchantLogo;
     }
@@ -13,7 +15,7 @@ public class VisualInfo {
         return merchantName;
     }
 
-    public String getMerchantLogo() {
+    public URL getMerchantLogo() {
         return merchantLogo;
     }
 }
