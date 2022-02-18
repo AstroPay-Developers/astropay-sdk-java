@@ -25,7 +25,6 @@ import java.util.concurrent.TimeoutException;
 public class Deposit {
     private DepositResultListener depositResultListener;
     private boolean sandbox = false;
-    private String apiKey;
     private BigDecimal amount;
     private Currency currency;
     private String country;
@@ -50,7 +49,7 @@ public class Deposit {
      * @throws APException APBase Exception
      */
     public void init() throws APException {
-        if (this.apiKey == null || AstroPay.Sdk.getSecretKey() == null) {
+        if (AstroPay.Sdk.getApiKey() == null || AstroPay.Sdk.getSecretKey() == null) {
             throw new APException("You must provide API-Key and Secret Key");
         }
         String depositURL = requestURL.replace("%env", this.sandbox ? "onetouch-api-sandbox" : "onetouch-api");
@@ -85,7 +84,7 @@ public class Deposit {
         }
 
         HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(depositURL)).timeout(Duration.ofMinutes(2)).headers("Content-Type", "application/json", "Merchant-Gateway-Api-Key", this.apiKey, "Signature", hash).POST(HttpRequest.BodyPublishers.ofString(bodyRequest)).build();
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(depositURL)).timeout(Duration.ofMinutes(2)).headers("Content-Type", "application/json", "Merchant-Gateway-Api-Key", AstroPay.Sdk.getApiKey(), "Signature", hash).POST(HttpRequest.BodyPublishers.ofString(bodyRequest)).build();
 
         CompletableFuture<HttpResponse<String>> response = client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
 
@@ -126,7 +125,7 @@ public class Deposit {
         String statusURL = getStatusURL.replace("%env", this.sandbox ? "onetouch-api-sandbox" : "onetouch-api");
         statusURL = statusURL.replace("%deposit_external_id", deposit_external_id);
         HttpClient client = HttpClient.newHttpClient();
-        HttpRequest get = HttpRequest.newBuilder().uri(URI.create(statusURL)).timeout(Duration.ofMinutes(2)).headers("Content-Type", "application/json", "Merchant-Gateway-Api-Key", this.apiKey).GET().build();
+        HttpRequest get = HttpRequest.newBuilder().uri(URI.create(statusURL)).timeout(Duration.ofMinutes(2)).headers("Content-Type", "application/json", "Merchant-Gateway-Api-Key", AstroPay.Sdk.getApiKey()).GET().build();
 
         CompletableFuture<HttpResponse<String>> response = client.sendAsync(get, HttpResponse.BodyHandlers.ofString());
 
@@ -203,13 +202,6 @@ public class Deposit {
     }
 
     //region Setters
-
-    /**
-     * @param apiKey merchant API-Key
-     */
-    public void setApiKey(String apiKey) {
-        this.apiKey = apiKey;
-    }
 
     public void setSandbox(boolean sandbox) {
         this.sandbox = sandbox;
