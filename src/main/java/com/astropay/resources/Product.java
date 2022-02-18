@@ -1,14 +1,14 @@
 package com.astropay.resources;
 
 public class Product {
-    private String mcc;
+    private final String mcc;
+    private final String merchantCode;
+    private final String description;
     private String category; //optional
-    private String merchant_code;
-    private String description;
 
-    public Product(String mcc, String merchant_code, String description) {
+    public Product(String mcc, String merchantCode, String description) {
         this.mcc = mcc;
-        this.merchant_code = merchant_code;
+        this.merchantCode = merchantCode;
         this.description = description;
     }
 
@@ -16,31 +16,19 @@ public class Product {
         return mcc;
     }
 
-    public void setMcc(String mcc) {
-        this.mcc = mcc;
-    }
-
     public String getCategory() {
         return category;
     }
 
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
-    public String getMerchant_code() {
-        return merchant_code;
-    }
-
-    public void setMerchant_code(String merchant_code) {
-        this.merchant_code = merchant_code;
+    public String getMerchantCode() {
+        return merchantCode;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setCategory(String category) {
+        this.category = category;
     }
 }

@@ -28,10 +28,10 @@ public class Deposit {
     private BigDecimal amount;
     private Currency currency;
     private String country;
-    private String merchant_deposit_id;
-    private String deposit_external_id;
-    private String callback_url;
-    private String redirect_url; //optional
+    private String merchantDepositId;
+    private String depositExternalId;
+    private String callbackUrl;
+    private String redirectUrl; //optional
     private User user;
     private Product product;
     private VisualInfo visualInfo; //optional
@@ -58,21 +58,21 @@ public class Deposit {
                 "\"amount\": " + this.amount + "," +
                 "\"currency\": \"" + this.currency + "\"," +
                 "\"country\": \"" + this.country + "\"," +
-                "\"merchant_deposit_id\": \"" + this.merchant_deposit_id + "\"," +
-                "\"callback_url\": \"" + this.callback_url + "\"," +
-                "\"redirect_url\": \" " + this.redirect_url + "\"," +
+                "\"merchant_deposit_id\": \"" + this.merchantDepositId + "\"," +
+                "\"callback_url\": \"" + this.callbackUrl + "\"," +
+                "\"redirect_url\": \" " + this.redirectUrl + "\"," +
                 "\"user\": {\n" +
-                "    \"merchant_user_id\": \"" + this.user.getMerchant_user_id() +
+                "    \"merchant_user_id\": \"" + this.user.getMerchantUserId() +
                 "\"}\n," +
                 "\"product\": {\n" +
                 "    \"mcc\": \"" + this.product.getMcc() + "\",\n" +
                 "    \"category\": \"" + this.product.getCategory() + "\",\n" +
-                "    \"merchant_code\": \"" + this.product.getMerchant_code() + "\",\n" +
+                "    \"merchant_code\": \"" + this.product.getMerchantCode() + "\",\n" +
                 "    \"description\": \"" + this.product.getDescription() + "\"\n" +
                 "    },\n" +
                 "\"visual_info\": {\n" +
-                "    \"merchant_name\": \"" + this.visualInfo.getMerchant_name() + "\",\n" +
-                "    \"merchant_logo\": \"" + this.visualInfo.getMerchant_logo() + "\"\n" +
+                "    \"merchant_name\": \"" + this.visualInfo.getMerchantName() + "\",\n" +
+                "    \"merchant_logo\": \"" + this.visualInfo.getMerchantLogo() + "\"\n" +
                 "    }\n" +
                 "}";
         String hash = null;
@@ -80,7 +80,7 @@ public class Deposit {
             hash = toHexString(calcHmacSha256(AstroPay.Sdk.getSecretKey().getBytes(StandardCharsets.UTF_8), bodyRequest.getBytes(StandardCharsets.UTF_8)));
         } catch (Exception e) {
             e.printStackTrace();
-            throw new APException(this.getMerchant_deposit_id(), "There was an error in the method signature");
+            throw new APException(this.getMerchantDepositId(), "There was an error in the method signature");
         }
 
         HttpClient client = HttpClient.newHttpClient();
@@ -93,13 +93,13 @@ public class Deposit {
             result = response.thenApply(HttpResponse::body).get(5, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             e.printStackTrace();
-            throw new APException(this.getMerchant_deposit_id(), "Thread is interrupted, either before or during the activity");
+            throw new APException(this.getMerchantDepositId(), "Thread is interrupted, either before or during the activity");
         } catch (ExecutionException e) {
             e.printStackTrace();
-            throw new APException(this.getMerchant_deposit_id(), "ExecutionException caused by: " + e.getCause(), e);
+            throw new APException(this.getMerchantDepositId(), "ExecutionException caused by: " + e.getCause(), e);
         } catch (TimeoutException e) {
             e.printStackTrace();
-            throw new APException(this.getMerchant_deposit_id(), "Timeout Exception", e);
+            throw new APException(this.getMerchantDepositId(), "Timeout Exception", e);
         }
 
         Gson g = new Gson();
@@ -110,7 +110,7 @@ public class Deposit {
             if (depositResponse.getError() != null) {
                 depositResultListener.OnDepositError(depositResponse);
             } else {
-                this.deposit_external_id = depositResponse.getDeposit_external_id();
+                this.depositExternalId = depositResponse.getDepositExternalId();
                 depositResultListener.OnDepositSuccess(depositResponse);
             }
         }
@@ -176,29 +176,11 @@ public class Deposit {
         return hmacSha256;
     }
 
-    public static byte[] getSHA(String input) throws NoSuchAlgorithmException {
-        // Static getInstance method is called with hashing SHA
-        MessageDigest md = MessageDigest.getInstance("SHA-256");
-
-        // digest() method called
-        // to calculate message digest of an input
-        // and return array of byte
-        return md.digest(input.getBytes(StandardCharsets.UTF_8));
-    }
-
-    public static String encode(String key, String data) throws Exception {
-        Mac sha256_HMAC = Mac.getInstance("HmacSHA256");
-        SecretKeySpec secret_key = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
-        sha256_HMAC.init(secret_key);
-
-        return toHexString(sha256_HMAC.doFinal(data.getBytes(StandardCharsets.UTF_8)));
-    }
-
     /**
      * @return merchant_deposit_id Unique identifier of transaction
      */
-    public String getMerchant_deposit_id() {
-        return merchant_deposit_id;
+    public String getMerchantDepositId() {
+        return merchantDepositId;
     }
 
     //region Setters
@@ -228,16 +210,16 @@ public class Deposit {
         this.country = country;
     }
 
-    public void setMerchant_deposit_id(String merchant_deposit_id) {
-        this.merchant_deposit_id = merchant_deposit_id;
+    public void setMerchantDepositId(String merchantDepositId) {
+        this.merchantDepositId = merchantDepositId;
     }
 
-    public void setCallback_url(String callback_url) {
-        this.callback_url = callback_url;
+    public void setCallbackUrl(String callbackUrl) {
+        this.callbackUrl = callbackUrl;
     }
 
-    public void setRedirect_url(String redirect_url) {
-        this.redirect_url = redirect_url;
+    public void setRedirectUrl(String redirectUrl) {
+        this.redirectUrl = redirectUrl;
     }
 
     public void setUser(User user) {

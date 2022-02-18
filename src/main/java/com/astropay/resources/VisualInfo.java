@@ -1,19 +1,19 @@
 package com.astropay.resources;
 
 public class VisualInfo {
-    private String merchant_name;
-    private String merchant_logo;
+    private final String merchantName;
+    private final String merchantLogo;
 
-    public VisualInfo(String merchant_name, String merchant_logo) {
-        this.merchant_name = merchant_name;
-        this.merchant_logo = merchant_logo;
+    public VisualInfo(String merchantName, String merchantLogo) {
+        this.merchantName = merchantName;
+        this.merchantLogo = merchantLogo;
     }
 
-    public String getMerchant_name() {
-        return merchant_name;
+    public String getMerchantName() {
+        return merchantName;
     }
 
-    public String getMerchant_logo() {
-        return merchant_logo;
+    public String getMerchantLogo() {
+        return merchantLogo;
     }
 }

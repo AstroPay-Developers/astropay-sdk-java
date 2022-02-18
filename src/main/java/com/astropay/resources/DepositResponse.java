@@ -16,11 +16,11 @@ public class DepositResponse {
         return url;
     }
 
-    public String getMerchant_deposit_id() {
+    public String getMerchantDepositId() {
         return merchant_deposit_id;
     }
 
-    public String getDeposit_external_id() {
+    public String getDepositExternalId() {
         return deposit_external_id;
     }
 

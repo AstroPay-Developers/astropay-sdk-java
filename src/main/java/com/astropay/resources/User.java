@@ -3,35 +3,31 @@ package com.astropay.resources;
 import java.util.Date;
 
 public class User {
-    private String merchant_user_id;
-    private String user_id;
+    private final String merchantUserId;
+    private String userId;
     private String document;
     private DocumentType documentType;
     private String email;
     private String phone;
-    private String first_name;
-    private String last_name;
-    private Date birth_date;
+    private String firstName;
+    private String lastName;
+    private Date birthDate;
     private String country;
 
-    public User(String merchant_user_id) {
-        this.merchant_user_id = merchant_user_id;
+    public User(String merchantUserId) {
+        this.merchantUserId = merchantUserId;
     }
 
-    public String getMerchant_user_id() {
-        return merchant_user_id;
+    public String getMerchantUserId() {
+        return merchantUserId;
     }
 
-    public void setMerchant_user_id(String merchant_user_id) {
-        this.merchant_user_id = merchant_user_id;
+    public String getUserId() {
+        return userId;
     }
 
-    public String getUser_id() {
-        return user_id;
-    }
-
-    public void setUser_id(String user_id) {
-        this.user_id = user_id;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getDocument() {
@@ -66,28 +62,28 @@ public class User {
         this.phone = phone;
     }
 
-    public String getFirst_name() {
-        return first_name;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setFirst_name(String first_name) {
-        this.first_name = first_name;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
-    public String getLast_name() {
-        return last_name;
+    public String getLastName() {
+        return lastName;
     }
 
-    public void setLast_name(String last_name) {
-        this.last_name = last_name;
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
-    public Date getBirth_date() {
-        return birth_date;
+    public Date getBirthDate() {
+        return birthDate;
     }
 
-    public void setBirth_date(Date birth_date) {
-        this.birth_date = birth_date;
+    public void setBirthDate(Date birthDate) {
+        this.birthDate = birthDate;
     }
 
     public String getCountry() {
