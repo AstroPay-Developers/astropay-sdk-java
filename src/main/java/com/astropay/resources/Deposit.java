@@ -2,6 +2,7 @@ package com.astropay.resources;
 
 import com.astropay.AstroPay;
 import com.astropay.exceptions.APException;
+import com.astropay.utils.Hmac;
 import com.google.gson.Gson;
 
 import javax.crypto.Mac;
@@ -32,9 +33,9 @@ public class Deposit {
     private String depositExternalId;
     private URL callbackUrl;
     private URL redirectUrl; //optional
-    private User user;
-    private Product product;
     private VisualInfo visualInfo; //optional
+    private final Product product;
+    private final User user;
     private static final String requestURL = "https://%env.astropay.com/merchant/v1/deposit/init";
     private static final String getStatusURL = "https://%env.astropay.com/merchant/v1/deposit/%deposit_external_id/status";
 
@@ -77,7 +78,7 @@ public class Deposit {
                 "}";
         String hash = null;
         try {
-            hash = toHexString(calcHmacSha256(AstroPay.Sdk.getSecretKey().getBytes(StandardCharsets.UTF_8), bodyRequest.getBytes(StandardCharsets.UTF_8)));
+            hash = Hmac.toHexString(Hmac.calcHmacSha256(AstroPay.Sdk.getSecretKey().getBytes(StandardCharsets.UTF_8), bodyRequest.getBytes(StandardCharsets.UTF_8)));
         } catch (Exception e) {
             e.printStackTrace();
             throw new APException(this.getMerchantDepositId(), "There was an error in the method signature");
@@ -110,7 +111,7 @@ public class Deposit {
             if (depositResponse.getError() != null) {
                 depositResultListener.OnDepositError(depositResponse);
             } else {
-                this.depositExternalId = depositResponse.getDepositExternalId();
+                depositExternalId = depositResponse.getDepositExternalId();
                 depositResultListener.OnDepositSuccess(depositResponse);
             }
         }
@@ -149,31 +150,6 @@ public class Deposit {
      */
     public void registerDepositResultEventListener(DepositResultListener mListener) {
         this.depositResultListener = mListener;
-    }
-
-    public static String toHexString(byte[] hash) {
-        // Convert byte array into signum representation
-        BigInteger number = new BigInteger(1, hash);
-        // Convert message digest into hex value
-        StringBuilder hexString = new StringBuilder(number.toString(16));
-        // Pad with leading zeros
-        while (hexString.length() < 32) {
-            hexString.insert(0, '0');
-        }
-        return hexString.toString();
-    }
-
-    static public byte[] calcHmacSha256(byte[] secretKey, byte[] message) {
-        byte[] hmacSha256;
-        try {
-            Mac mac = Mac.getInstance("HmacSHA256");
-            SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey, "HmacSHA256");
-            mac.init(secretKeySpec);
-            hmacSha256 = mac.doFinal(message);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to calculate hmac-sha256", e);
-        }
-        return hmacSha256;
     }
 
     /**
@@ -220,14 +196,6 @@ public class Deposit {
 
     public void setRedirectUrl(URL redirectUrl) {
         this.redirectUrl = redirectUrl;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public void setProduct(Product product) {
-        this.product = product;
     }
 
     public void setVisualInfo(VisualInfo visualInfo) {
