@@ -4,13 +4,13 @@ import java.util.Date;
 
 public class User {
     private final String merchantUserId;
-    private String userId;
-    private String document;
+    private String userId = "";
+    private String document = "";
     private DocumentType documentType;
-    private String email;
-    private String phone;
-    private String firstName;
-    private String lastName;
+    private String email = "";
+    private String phone = "";
+    private String firstName = "";
+    private String lastName = "";
     private Date birthDate;
     private String country;
 

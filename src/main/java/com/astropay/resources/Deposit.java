@@ -63,8 +63,17 @@ public class Deposit {
                 "\"callback_url\": \"" + this.callbackUrl + "\"," +
                 "\"redirect_url\": \" " + this.redirectUrl + "\"," +
                 "\"user\": {\n" +
-                "    \"merchant_user_id\": \"" + this.user.getMerchantUserId() +
-                "\"}\n," +
+                "    \"user_id\": \"" + this.user.getUserId() + "\",\n" +
+                "    \"merchant_user_id\": \"" + this.user.getMerchantUserId() + "\",\n" +
+                "    \"document\": \"" + this.user.getDocument() + "\",\n" +
+                "    \"document_type\": \"" + (this.user.getDocumentType() != null ? this.user.getDocumentType() : "") + "\",\n" +
+                "    \"email\": \"" + this.user.getEmail() + "\",\n" +
+                "    \"phone\": \"" + this.user.getPhone() + "\",\n" +
+                "    \"first_name\": \"" + this.user.getFirstName() + "\",\n" +
+                "    \"last_name\": \"" + this.user.getLastName() + "\",\n" +
+                "    \"birth_date\": \"" + (this.user.getBirthDate() != null ? this.user.getBirthDate() : "") + "\",\n" +
+                "    \"country\": \"" + (this.user.getCountry() != null ? this.user.getCountry() : "UY") + "\"\n" +
+                "}\n," +
                 "\"product\": {\n" +
                 "    \"mcc\": \"" + this.product.getMcc() + "\",\n" +
                 "    \"category\": \"" + this.product.getCategory() + "\",\n" +
@@ -77,6 +86,7 @@ public class Deposit {
                 "    }\n" +
                 "}";
         String hash = null;
+        System.out.println(bodyRequest);
         try {
             hash = Hmac.toHexString(Hmac.calcHmacSha256(AstroPay.Sdk.getSecretKey().getBytes(StandardCharsets.UTF_8), bodyRequest.getBytes(StandardCharsets.UTF_8)));
         } catch (Exception e) {
