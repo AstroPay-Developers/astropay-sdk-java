@@ -39,26 +39,18 @@ public class Cashout {
         }
         String cashoutURL = requestURL.replace("%env", this.sandbox ? "onetouch-api-sandbox" : "onetouch-api");
 
-        String bodyRequest = "{" +
-                "\"amount\": " + this.amount + "," +
-                "\"currency\": \"" + this.currency + "\"," +
-                "\"country\": \"" + this.country + "\"," +
-                "\"merchant_cashout_id\": \"" + this.merchantCashoutId + "\"," +
-                "\"callback_url\": \"" + this.callbackUrl + "\"," +
-                "\"user\": {\n" +
-                "    \"merchant_user_id\": \"" + this.user.getMerchantUserId() +
-                "\"}\n" +
-                "}";
+        String jsonRequest = this.buildCashoutRequest();
+        System.out.println(jsonRequest); //ToDo(alvarod): remove
         String hash = null;
         try {
-            hash = Hmac.toHexString(Hmac.calcHmacSha256(AstroPay.Sdk.getSecretKey().getBytes(StandardCharsets.UTF_8), bodyRequest.getBytes(StandardCharsets.UTF_8)));
+            hash = Hmac.toHexString(Hmac.calcHmacSha256(AstroPay.Sdk.getSecretKey().getBytes(StandardCharsets.UTF_8), jsonRequest.getBytes(StandardCharsets.UTF_8)));
         } catch (Exception e) {
             e.printStackTrace();
             throw new APException(this.merchantCashoutId, "There was an error in the method signature");
         }
 
         HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(cashoutURL)).timeout(Duration.ofMinutes(2)).headers("Content-Type", "application/json", "Merchant-Gateway-Api-Key", AstroPay.Sdk.getApiKey(), "Signature", hash).POST(HttpRequest.BodyPublishers.ofString(bodyRequest)).build();
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(cashoutURL)).timeout(Duration.ofMinutes(2)).headers("Content-Type", "application/json", "Merchant-Gateway-Api-Key", AstroPay.Sdk.getApiKey(), "Signature", hash).POST(HttpRequest.BodyPublishers.ofString(jsonRequest)).build();
 
         CompletableFuture<HttpResponse<String>> response = client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
 
@@ -88,6 +80,29 @@ public class Cashout {
                 cashoutResultListener.OnCashoutSuccess(cashoutResponse);
             }
         }
+    }
+
+    private String buildCashoutRequest() {
+        Gson gson = new Gson();
+        CashoutRequest cashoutRequest = new CashoutRequest();
+        cashoutRequest.amount = amount.toString();
+        cashoutRequest.currency = currency;
+        cashoutRequest.country = country;
+        cashoutRequest.merchant_cashout_id = merchantCashoutId;
+        cashoutRequest.callback_url = callbackUrl.toString();
+        cashoutRequest.user = new UserRequest();
+        cashoutRequest.user.user_id = user.getUserId();
+        cashoutRequest.user.merchant_user_id = user.getMerchantUserId();
+        cashoutRequest.user.document = user.getDocument();
+        cashoutRequest.user.document_type = user.getDocumentType() != null ? user.getDocumentType().toString() : null;
+        cashoutRequest.user.email = user.getEmail();
+        cashoutRequest.user.phone = user.getPhone();
+        cashoutRequest.user.first_name = user.getFirstName();
+        cashoutRequest.user.last_name = user.getLastName();
+        cashoutRequest.user.birth_date = user.getBirthDate() != null ? user.getBirthDate().toString() : null;
+        cashoutRequest.user.country = user.getCountry();
+
+        return gson.toJson(cashoutRequest, CashoutRequest.class);
     }
 
     public void setSandbox(boolean sandbox) {
