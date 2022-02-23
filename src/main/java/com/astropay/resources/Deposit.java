@@ -4,6 +4,7 @@ import com.astropay.AstroPay;
 import com.astropay.exceptions.APException;
 import com.astropay.utils.Hmac;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -55,47 +56,17 @@ public class Deposit {
         }
         String depositURL = requestURL.replace("%env", this.sandbox ? "onetouch-api-sandbox" : "onetouch-api");
 
-        String bodyRequest = "{" +
-                "\"amount\": " + this.amount + "," +
-                "\"currency\": \"" + this.currency + "\"," +
-                "\"country\": \"" + this.country + "\"," +
-                "\"merchant_deposit_id\": \"" + this.merchantDepositId + "\"," +
-                "\"callback_url\": \"" + this.callbackUrl + "\"," +
-                "\"redirect_url\": \" " + this.redirectUrl + "\"," +
-                "\"user\": {\n" +
-                "    \"user_id\": \"" + this.user.getUserId() + "\",\n" +
-                "    \"merchant_user_id\": \"" + this.user.getMerchantUserId() + "\",\n" +
-                "    \"document\": \"" + this.user.getDocument() + "\",\n" +
-                "    \"document_type\": \"" + (this.user.getDocumentType() != null ? this.user.getDocumentType() : "") + "\",\n" +
-                "    \"email\": \"" + this.user.getEmail() + "\",\n" +
-                "    \"phone\": \"" + this.user.getPhone() + "\",\n" +
-                "    \"first_name\": \"" + this.user.getFirstName() + "\",\n" +
-                "    \"last_name\": \"" + this.user.getLastName() + "\",\n" +
-                "    \"birth_date\": \"" + (this.user.getBirthDate() != null ? this.user.getBirthDate() : "") + "\",\n" +
-                "    \"country\": \"" + (this.user.getCountry() != null ? this.user.getCountry() : "UY") + "\"\n" +
-                "}\n," +
-                "\"product\": {\n" +
-                "    \"mcc\": \"" + this.product.getMcc() + "\",\n" +
-                "    \"category\": \"" + this.product.getCategory() + "\",\n" +
-                "    \"merchant_code\": \"" + this.product.getMerchantCode() + "\",\n" +
-                "    \"description\": \"" + this.product.getDescription() + "\"\n" +
-                "    },\n" +
-                "\"visual_info\": {\n" +
-                "    \"merchant_name\": \"" + this.visualInfo.getMerchantName() + "\",\n" +
-                "    \"merchant_logo\": \"" + this.visualInfo.getMerchantLogo() + "\"\n" +
-                "    }\n" +
-                "}";
+        String jsonRequest = this.buildDepositRequest();
         String hash = null;
-        System.out.println(bodyRequest);
         try {
-            hash = Hmac.toHexString(Hmac.calcHmacSha256(AstroPay.Sdk.getSecretKey().getBytes(StandardCharsets.UTF_8), bodyRequest.getBytes(StandardCharsets.UTF_8)));
+            hash = Hmac.toHexString(Hmac.calcHmacSha256(AstroPay.Sdk.getSecretKey().getBytes(StandardCharsets.UTF_8), jsonRequest.getBytes(StandardCharsets.UTF_8)));
         } catch (Exception e) {
             e.printStackTrace();
             throw new APException(this.getMerchantDepositId(), "There was an error in the method signature");
         }
 
         HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(depositURL)).timeout(Duration.ofMinutes(2)).headers("Content-Type", "application/json", "Merchant-Gateway-Api-Key", AstroPay.Sdk.getApiKey(), "Signature", hash).POST(HttpRequest.BodyPublishers.ofString(bodyRequest)).build();
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(depositURL)).timeout(Duration.ofMinutes(2)).headers("Content-Type", "application/json", "Merchant-Gateway-Api-Key", AstroPay.Sdk.getApiKey(), "Signature", hash).POST(HttpRequest.BodyPublishers.ofString(jsonRequest)).build();
 
         CompletableFuture<HttpResponse<String>> response = client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
 
@@ -169,8 +140,39 @@ public class Deposit {
         return merchantDepositId;
     }
 
-    //region Setters
+    private String buildDepositRequest() {
+        Gson gson = new Gson();
+        DepositRequest depositRequest = new DepositRequest();
+        depositRequest.amount = amount.toString();
+        depositRequest.currency = currency;
+        depositRequest.country = country;
+        depositRequest.merchant_deposit_id = merchantDepositId;
+        depositRequest.callback_url = callbackUrl.toString();
+        depositRequest.redirect_url = redirectUrl != null ? redirectUrl.toString() : null;
+        depositRequest.user = new UserRequest();
+        depositRequest.user.user_id = user.getUserId();
+        depositRequest.user.merchant_user_id = user.getMerchantUserId();
+        depositRequest.user.document = user.getDocument();
+        depositRequest.user.document_type = user.getDocumentType() != null ? user.getDocumentType().toString() : null;
+        depositRequest.user.email = user.getEmail();
+        depositRequest.user.phone = user.getPhone();
+        depositRequest.user.first_name = user.getFirstName();
+        depositRequest.user.last_name = user.getLastName();
+        depositRequest.user.birth_date = user.getBirthDate() != null ? user.getBirthDate().toString() : null;
+        depositRequest.user.country = user.getCountry();
+        depositRequest.product = new ProductRequest();
+        depositRequest.product.mcc = product.getMcc();
+        depositRequest.product.category = product.getCategory();
+        depositRequest.product.merchant_code = product.getMerchantCode();
+        depositRequest.product.description = product.getDescription();
+        depositRequest.visual_info = new VisualInfoRequest();
+        depositRequest.visual_info.merchant_name = visualInfo.getMerchantName();
+        depositRequest.visual_info.merchant_logo = visualInfo.getMerchantLogo().toString();
 
+        return gson.toJson(depositRequest, DepositRequest.class);
+    }
+
+    //region Setters
     public void setSandbox(boolean sandbox) {
         this.sandbox = sandbox;
     }
