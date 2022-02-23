@@ -4,21 +4,14 @@ import com.astropay.AstroPay;
 import com.astropay.exceptions.APException;
 import com.astropay.utils.Hmac;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.net.*;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
-import java.util.Currency;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -26,7 +19,6 @@ import java.util.concurrent.TimeoutException;
 
 public class Deposit {
     private DepositResultListener depositResultListener;
-    private boolean sandbox = false;
     private BigDecimal amount;
     private String currency;
     private String country;
@@ -37,8 +29,6 @@ public class Deposit {
     private VisualInfo visualInfo; //optional
     private final Product product;
     private final User user;
-    private static final String requestURL = "https://%env.astropay.com/merchant/v1/deposit/init";
-    private static final String getStatusURL = "https://%env.astropay.com/merchant/v1/deposit/%deposit_external_id/status";
 
     public Deposit(User user, Product product) {
         this.user = user;
@@ -54,7 +44,9 @@ public class Deposit {
         if (AstroPay.Sdk.getApiKey() == null || AstroPay.Sdk.getSecretKey() == null) {
             throw new APException("You must provide API-Key and Secret Key");
         }
-        String depositURL = requestURL.replace("%env", this.sandbox ? "onetouch-api-sandbox" : "onetouch-api");
+        String depositURL = AstroPay.Sdk.getDepositURL();
+
+        System.out.println(depositURL);
 
         String jsonRequest = this.buildDepositRequest();
         String hash = null;
@@ -104,7 +96,7 @@ public class Deposit {
      * @param deposit_external_id Deposit external ID
      */
     public void checkDepositStatus(String deposit_external_id) {
-        String statusURL = getStatusURL.replace("%env", this.sandbox ? "onetouch-api-sandbox" : "onetouch-api");
+        String statusURL = AstroPay.Sdk.getStatusURL();
         statusURL = statusURL.replace("%deposit_external_id", deposit_external_id);
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest get = HttpRequest.newBuilder().uri(URI.create(statusURL)).timeout(Duration.ofMinutes(2)).headers("Content-Type", "application/json", "Merchant-Gateway-Api-Key", AstroPay.Sdk.getApiKey()).GET().build();
@@ -170,11 +162,6 @@ public class Deposit {
         depositRequest.visual_info.merchant_logo = visualInfo.getMerchantLogo().toString();
 
         return gson.toJson(depositRequest, DepositRequest.class);
-    }
-
-    //region Setters
-    public void setSandbox(boolean sandbox) {
-        this.sandbox = sandbox;
     }
 
     /**
