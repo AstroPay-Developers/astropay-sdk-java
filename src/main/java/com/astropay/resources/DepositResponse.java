@@ -1,12 +1,10 @@
 package com.astropay.resources;
 
-public class DepositResponse {
+public class DepositResponse extends ErrorResponse {
     private String status;
     private String url;
     private String merchant_deposit_id;
     private String deposit_external_id;
-    private String error;
-    private String description;
 
     public String getStatus() {
         return status;
@@ -22,13 +20,5 @@ public class DepositResponse {
 
     public String getDepositExternalId() {
         return deposit_external_id;
-    }
-
-    public String getError() {
-        return error;
-    }
-
-    public String getDescription() {
-        return description;
     }
 }

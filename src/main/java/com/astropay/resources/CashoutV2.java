@@ -18,18 +18,21 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class CashoutV1 {
+public class CashoutV2 {
     private boolean sandbox = false;
-    private CashoutResultListener cashoutResultListener;
+    private CashoutV2ResultListener cashoutResultListener;
     private BigDecimal amount;
     private String currency;
     private String country;
     private String merchantCashoutId;
     private URL callbackUrl;
     private final User user;
-    private static final String requestURL = "https://%env.astropay.com/merchant/v1/cashout";
+    private URL redirectUrl; //optional
+    private VisualInfo visualInfo; //optional
+    private CashoutOnHold security; //optional
+    private static final String requestURL = "https://%env.astropay.com/merchant/v2/cashout/init";
 
-    public CashoutV1(User user) {
+    public CashoutV2(User user) {
         this.user = user;
     }
 
@@ -68,7 +71,7 @@ public class CashoutV1 {
         }
 
         Gson g = new Gson();
-        CashoutResponse cashoutResponse = g.fromJson(result, CashoutResponse.class);
+        CashoutV2Response cashoutResponse = g.fromJson(result, CashoutV2Response.class);
 
         // check if listener is registered.
         if (this.cashoutResultListener != null) {
@@ -82,32 +85,43 @@ public class CashoutV1 {
 
     private String buildCashoutRequest() {
         Gson gson = new Gson();
-        CashoutRequest cashoutRequest = new CashoutRequest();
-        cashoutRequest.amount = amount.toString();
-        cashoutRequest.currency = currency;
-        cashoutRequest.country = country;
-        cashoutRequest.merchant_cashout_id = merchantCashoutId;
-        cashoutRequest.callback_url = callbackUrl.toString();
-        cashoutRequest.user = new UserRequest();
-        cashoutRequest.user.user_id = user.getUserId();
-        cashoutRequest.user.merchant_user_id = user.getMerchantUserId();
-        cashoutRequest.user.document = user.getDocument();
-        cashoutRequest.user.document_type = user.getDocumentType() != null ? user.getDocumentType().toString() : null;
-        cashoutRequest.user.email = user.getEmail();
-        cashoutRequest.user.phone = user.getPhone();
-        cashoutRequest.user.first_name = user.getFirstName();
-        cashoutRequest.user.last_name = user.getLastName();
-        cashoutRequest.user.birth_date = user.getBirthDate() != null ? user.getBirthDate().toString() : null;
-        cashoutRequest.user.country = user.getCountry();
+        CashoutV2Request cashoutV2Request = new CashoutV2Request();
+        cashoutV2Request.amount = amount.toString();
+        cashoutV2Request.currency = currency;
+        cashoutV2Request.country = country;
+        cashoutV2Request.merchant_cashout_id = merchantCashoutId;
+        cashoutV2Request.callback_url = callbackUrl != null ? callbackUrl.toString() : null;
+        cashoutV2Request.user = new UserRequest();
+        cashoutV2Request.user.user_id = user.getUserId();
+        cashoutV2Request.user.merchant_user_id = user.getMerchantUserId();
+        cashoutV2Request.user.document = user.getDocument();
+        cashoutV2Request.user.document_type = user.getDocumentType() != null ? user.getDocumentType().toString() : null;
+        cashoutV2Request.user.email = user.getEmail();
+        cashoutV2Request.user.phone = user.getPhone();
+        cashoutV2Request.user.first_name = user.getFirstName();
+        cashoutV2Request.user.last_name = user.getLastName();
+        cashoutV2Request.user.birth_date = user.getBirthDate() != null ? user.getBirthDate().toString() : null;
+        cashoutV2Request.user.country = user.getCountry();
+        cashoutV2Request.redirect_url = redirectUrl != null ? redirectUrl.toString() : null;
+        if (visualInfo != null) {
+            cashoutV2Request.visual_info = new VisualInfoRequest();
+            cashoutV2Request.visual_info.merchant_name = visualInfo.getMerchantName();
+            cashoutV2Request.visual_info.merchant_logo = visualInfo.getMerchantLogo().toString();
+        }
+        if (security != null) {
+            cashoutV2Request.security = new CashoutOnHoldRequest();
+            cashoutV2Request.security.create_on_hold = security.createOnHold;
+            cashoutV2Request.security.on_hold_confirmation_url = security.onHoldConfirmationUrl;
+        }
 
-        return gson.toJson(cashoutRequest, CashoutRequest.class);
+        return gson.toJson(cashoutV2Request, CashoutRequest.class);
     }
 
     public void setSandbox(boolean sandbox) {
         this.sandbox = sandbox;
     }
 
-    public void setCashoutResultListener(CashoutResultListener cashoutResultListener) {
+    public void setCashoutResultListener(CashoutV2ResultListener cashoutResultListener) {
         this.cashoutResultListener = cashoutResultListener;
     }
 
@@ -129,5 +143,17 @@ public class CashoutV1 {
 
     public void setCallbackUrl(URL callbackUrl) {
         this.callbackUrl = callbackUrl;
+    }
+
+    public void setRedirectUrl(URL redirectUrl) {
+        this.redirectUrl = redirectUrl;
+    }
+
+    public void setVisualInfo(VisualInfo visualInfo) {
+        this.visualInfo = visualInfo;
+    }
+
+    public void setSecurity(CashoutOnHold security) {
+        this.security = security;
     }
 }

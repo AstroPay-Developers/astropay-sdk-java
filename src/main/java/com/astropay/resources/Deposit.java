@@ -157,9 +157,11 @@ public class Deposit {
         depositRequest.product.category = product.getCategory();
         depositRequest.product.merchant_code = product.getMerchantCode();
         depositRequest.product.description = product.getDescription();
-        depositRequest.visual_info = new VisualInfoRequest();
-        depositRequest.visual_info.merchant_name = visualInfo.getMerchantName();
-        depositRequest.visual_info.merchant_logo = visualInfo.getMerchantLogo().toString();
+        if (visualInfo != null) {
+            depositRequest.visual_info = new VisualInfoRequest();
+            depositRequest.visual_info.merchant_name = visualInfo.getMerchantName();
+            depositRequest.visual_info.merchant_logo = visualInfo.getMerchantLogo().toString();
+        }
 
         return gson.toJson(depositRequest, DepositRequest.class);
     }
