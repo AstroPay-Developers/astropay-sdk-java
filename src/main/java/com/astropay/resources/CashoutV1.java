@@ -18,7 +18,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class Cashout {
+public class CashoutV1 {
     private boolean sandbox = false;
     private CashoutResultListener cashoutResultListener;
     private BigDecimal amount;
@@ -29,7 +29,7 @@ public class Cashout {
     private final User user;
     private static final String requestURL = "https://%env.astropay.com/merchant/v1/cashout";
 
-    public Cashout(User user) {
+    public CashoutV1(User user) {
         this.user = user;
     }
 
@@ -40,7 +40,6 @@ public class Cashout {
         String cashoutURL = requestURL.replace("%env", this.sandbox ? "onetouch-api-sandbox" : "onetouch-api");
 
         String jsonRequest = this.buildCashoutRequest();
-        System.out.println(jsonRequest); //ToDo(alvarod): remove
         String hash = null;
         try {
             hash = Hmac.toHexString(Hmac.calcHmacSha256(AstroPay.Sdk.getSecretKey().getBytes(StandardCharsets.UTF_8), jsonRequest.getBytes(StandardCharsets.UTF_8)));
