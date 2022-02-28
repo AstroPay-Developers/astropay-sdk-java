@@ -96,7 +96,7 @@ public class Deposit {
      * @param deposit_external_id Deposit external ID
      */
     public void checkDepositStatus(String deposit_external_id) {
-        String statusURL = AstroPay.Sdk.getStatusURL();
+        String statusURL = AstroPay.Sdk.getDepositStatusURL();
         statusURL = statusURL.replace("%deposit_external_id", deposit_external_id);
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest get = HttpRequest.newBuilder().uri(URI.create(statusURL)).timeout(Duration.ofMinutes(2)).headers("Content-Type", "application/json", "Merchant-Gateway-Api-Key", AstroPay.Sdk.getApiKey()).GET().build();

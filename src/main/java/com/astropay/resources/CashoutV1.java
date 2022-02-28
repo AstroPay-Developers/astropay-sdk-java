@@ -20,7 +20,7 @@ import java.util.concurrent.TimeoutException;
 
 public class CashoutV1 {
     private boolean sandbox = false;
-    private CashoutResultListener cashoutResultListener;
+    private CashoutV1ResultListener cashoutV1ResultListener;
     private BigDecimal amount;
     private String currency;
     private String country;
@@ -68,14 +68,14 @@ public class CashoutV1 {
         }
 
         Gson g = new Gson();
-        CashoutResponse cashoutResponse = g.fromJson(result, CashoutResponse.class);
+        CashoutV1Response cashoutV1Response = g.fromJson(result, CashoutV1Response.class);
 
         // check if listener is registered.
-        if (this.cashoutResultListener != null) {
-            if (cashoutResponse.getError() != null) {
-                cashoutResultListener.OnCashoutError(cashoutResponse);
+        if (this.cashoutV1ResultListener != null) {
+            if (cashoutV1Response.getError() != null) {
+                cashoutV1ResultListener.OnCashoutError(cashoutV1Response);
             } else {
-                cashoutResultListener.OnCashoutSuccess(cashoutResponse);
+                cashoutV1ResultListener.OnCashoutSuccess(cashoutV1Response);
             }
         }
     }
@@ -103,12 +103,38 @@ public class CashoutV1 {
         return gson.toJson(cashoutRequest, CashoutRequest.class);
     }
 
+    /**
+     * Checking Cashout Status
+     * If necessary, you can manually check a cashout status with this endpoint. Please note this is not required as a callback with the final status will be sent within 24h.
+     *
+     * @param cashout_id Cashout ID as Integer
+     */
+    public void checkCashoutV2Status(Integer cashout_id) {
+        String statusURL = AstroPay.Sdk.getCashoutV1StatusURL();
+        statusURL = statusURL.replace("%cashout_id", cashout_id.toString());
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest get = HttpRequest.newBuilder().uri(URI.create(statusURL)).timeout(Duration.ofMinutes(2)).headers("Content-Type", "application/json", "Merchant-Gateway-Api-Key", AstroPay.Sdk.getApiKey()).GET().build();
+
+        CompletableFuture<HttpResponse<String>> response = client.sendAsync(get, HttpResponse.BodyHandlers.ofString());
+
+        String result = null;
+        try {
+            result = response.thenApply(HttpResponse::body).get(5, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            e.printStackTrace();
+        }
+
+        Gson g = new Gson();
+        CashoutV1Response statusResponse = g.fromJson(result, CashoutV1Response.class);
+        cashoutV1ResultListener.OnCashoutStatusResult(statusResponse);
+    }
+
     public void setSandbox(boolean sandbox) {
         this.sandbox = sandbox;
     }
 
-    public void setCashoutResultListener(CashoutResultListener cashoutResultListener) {
-        this.cashoutResultListener = cashoutResultListener;
+    public void setCashoutResultListener(CashoutV1ResultListener cashoutResultListener) {
+        this.cashoutV1ResultListener = cashoutResultListener;
     }
 
     public void setAmount(BigDecimal amount) {

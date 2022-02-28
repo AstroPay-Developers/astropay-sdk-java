@@ -117,6 +117,33 @@ public class CashoutV2 {
         return gson.toJson(cashoutV2Request, CashoutRequest.class);
     }
 
+    /**
+     * Checking Cashout Status
+     * If necessary, you can manually check a cashout status with this endpoint. Please note this is not required as a callback with the final status will be sent within 24h.
+     *
+     * @param cashout_external_id Cashout external ID
+     */
+    public void checkCashoutV2Status(String cashout_external_id) {
+        String statusURL = AstroPay.Sdk.getDepositStatusURL();
+        statusURL = statusURL.replace("%cashout_external_id", cashout_external_id);
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest get = HttpRequest.newBuilder().uri(URI.create(statusURL)).timeout(Duration.ofMinutes(2)).headers("Content-Type", "application/json", "Merchant-Gateway-Api-Key", AstroPay.Sdk.getApiKey()).GET().build();
+
+        CompletableFuture<HttpResponse<String>> response = client.sendAsync(get, HttpResponse.BodyHandlers.ofString());
+
+        String result = null;
+        try {
+            result = response.thenApply(HttpResponse::body).get(5, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            e.printStackTrace();
+        }
+
+        Gson g = new Gson();
+        CashoutV2Response statusResponse = g.fromJson(result, CashoutV2Response.class);
+
+        cashoutResultListener.OnCashoutStatusResult(statusResponse);
+    }
+
     public void setSandbox(boolean sandbox) {
         this.sandbox = sandbox;
     }

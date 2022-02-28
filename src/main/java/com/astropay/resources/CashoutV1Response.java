@@ -1,6 +1,6 @@
 package com.astropay.resources;
 
-public class CashoutResponse extends ErrorResponse {
+public class CashoutV1Response extends ErrorResponse {
     private String status;
     private int cashout_id;
 

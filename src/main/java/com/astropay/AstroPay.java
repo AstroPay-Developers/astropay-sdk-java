@@ -19,7 +19,9 @@ public class AstroPay {
         private static volatile String secretKey = null;
         private static volatile String apiKey = null;
         private static final String depositURL = "https://%env.astropay.com/merchant/v1/deposit/init";
-        private static final String statusURL = "https://%env.astropay.com/merchant/v1/deposit/%deposit_external_id/status";
+        private static final String depositStatusURL = "https://%env.astropay.com/merchant/v1/deposit/%deposit_external_id/status";
+        private static final String cashoutV1StatusURL = "https://%env.astropay.com/merchant/v1/cashout/{cashout_id}/status";
+        private static final String cashoutV2StatusURL = "https://%env.astropay.com/merchant/v2/cashout/{cashout_external_id}/status";
 
         public static void setSandboxMode(Boolean sandboxMode) {
             Sdk.sandboxMode = sandboxMode;
@@ -45,8 +47,16 @@ public class AstroPay {
             return depositURL.replace("%env", sandboxMode ? "onetouch-api-sandbox" : "onetouch-api");
         }
 
-        public static String getStatusURL() {
-            return statusURL.replace("%env", sandboxMode ? "onetouch-api-sandbox" : "onetouch-api");
+        public static String getDepositStatusURL() {
+            return depositStatusURL.replace("%env", sandboxMode ? "onetouch-api-sandbox" : "onetouch-api");
+        }
+
+        public static String getCashoutV1StatusURL() {
+            return cashoutV1StatusURL.replace("%env", sandboxMode ? "onetouch-api-sandbox" : "onetouch-api");
+        }
+
+        public static String getCashoutV2StatusURL() {
+            return cashoutV2StatusURL.replace("%env", sandboxMode ? "onetouch-api-sandbox" : "onetouch-api");
         }
 
         /**
@@ -55,7 +65,7 @@ public class AstroPay {
          * @param deposit_external_id Deposit external ID
          */
         public static DepositResponse checkDepositStatus(String deposit_external_id) {
-            String getStatusURL = getStatusURL().replace("%deposit_external_id", deposit_external_id);
+            String getStatusURL = getDepositStatusURL().replace("%deposit_external_id", deposit_external_id);
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest get = HttpRequest.newBuilder().uri(URI.create(getStatusURL)).timeout(Duration.ofMinutes(2)).headers("Content-Type", "application/json", "Merchant-Gateway-Api-Key", AstroPay.Sdk.getApiKey()).GET().build();
 
