@@ -18,7 +18,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 public class Deposit {
-    private DepositResultListener depositResultListener;
     private BigDecimal amount;
     private String currency;
     private String country;
@@ -79,14 +78,11 @@ public class Deposit {
         Gson g = new Gson();
         DepositResponse depositResponse = g.fromJson(result, DepositResponse.class);
 
-        // check if listener is registered.
-        if (this.depositResultListener != null) {
-            if (depositResponse.getError() != null) {
-                depositResultListener.OnDepositError(depositResponse);
-            } else {
-                depositExternalId = depositResponse.getDepositExternalId();
-                depositResultListener.OnDepositSuccess(depositResponse);
-            }
+        if (depositResponse.getError() != null) {
+            AstroPay.Sdk.OnDepositError(depositResponse);
+        } else {
+            depositExternalId = depositResponse.getDepositExternalId();
+            AstroPay.Sdk.OnDepositSuccess(depositResponse);
         }
     }
 
@@ -113,16 +109,7 @@ public class Deposit {
         Gson g = new Gson();
         DepositResponse statusResponse = g.fromJson(result, DepositResponse.class);
 
-        depositResultListener.OnStatusResult(statusResponse);
-    }
-
-    /**
-     * Register listener
-     *
-     * @param mListener Deposit Result Listener
-     */
-    public void registerDepositResultEventListener(DepositResultListener mListener) {
-        this.depositResultListener = mListener;
+        AstroPay.Sdk.OnStatusResult(statusResponse);
     }
 
     /**
