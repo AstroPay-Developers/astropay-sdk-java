@@ -44,9 +44,6 @@ public class Deposit {
             throw new APException("You must provide API-Key and Secret Key");
         }
         String depositURL = AstroPay.Sdk.getDepositURL();
-
-        System.out.println(depositURL);
-
         String jsonRequest = this.buildDepositRequest();
         String hash = null;
         try {
@@ -109,7 +106,7 @@ public class Deposit {
         Gson g = new Gson();
         DepositResponse statusResponse = g.fromJson(result, DepositResponse.class);
 
-        AstroPay.Sdk.OnStatusResult(statusResponse);
+        AstroPay.Sdk.OnDepositStatusResult(statusResponse);
     }
 
     /**
@@ -152,6 +149,8 @@ public class Deposit {
 
         return gson.toJson(depositRequest, DepositRequest.class);
     }
+
+    // region Setters
 
     /**
      * @param amount Deposit Amount as BigDecimal

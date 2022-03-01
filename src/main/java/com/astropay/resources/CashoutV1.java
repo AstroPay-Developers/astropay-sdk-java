@@ -20,7 +20,6 @@ import java.util.concurrent.TimeoutException;
 
 public class CashoutV1 {
     private boolean sandbox = false;
-    private CashoutV1ResultListener cashoutV1ResultListener;
     private BigDecimal amount;
     private String currency;
     private String country;
@@ -71,13 +70,12 @@ public class CashoutV1 {
         CashoutV1Response cashoutV1Response = g.fromJson(result, CashoutV1Response.class);
 
         // check if listener is registered.
-        if (this.cashoutV1ResultListener != null) {
-            if (cashoutV1Response.getError() != null) {
-                cashoutV1ResultListener.OnCashoutError(cashoutV1Response);
-            } else {
-                cashoutV1ResultListener.OnCashoutSuccess(cashoutV1Response);
-            }
+        if (cashoutV1Response.getError() != null) {
+            AstroPay.Sdk.OnCashoutV1Error(cashoutV1Response);
+        } else {
+            AstroPay.Sdk.OnCashoutV1Success(cashoutV1Response);
         }
+
     }
 
     private String buildCashoutRequest() {
@@ -109,7 +107,7 @@ public class CashoutV1 {
      *
      * @param cashout_id Cashout ID as Integer
      */
-    public void checkCashoutV2Status(Integer cashout_id) {
+    public void checkCashoutV1Status(Integer cashout_id) {
         String statusURL = AstroPay.Sdk.getCashoutV1StatusURL();
         statusURL = statusURL.replace("%cashout_id", cashout_id.toString());
         HttpClient client = HttpClient.newHttpClient();
@@ -126,15 +124,11 @@ public class CashoutV1 {
 
         Gson g = new Gson();
         CashoutV1Response statusResponse = g.fromJson(result, CashoutV1Response.class);
-        cashoutV1ResultListener.OnCashoutStatusResult(statusResponse);
+        AstroPay.Sdk.OnCashoutV1StatusResult(statusResponse);
     }
 
     public void setSandbox(boolean sandbox) {
         this.sandbox = sandbox;
-    }
-
-    public void setCashoutResultListener(CashoutV1ResultListener cashoutResultListener) {
-        this.cashoutV1ResultListener = cashoutResultListener;
     }
 
     public void setAmount(BigDecimal amount) {
