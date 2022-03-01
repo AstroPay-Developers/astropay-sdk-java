@@ -43,6 +43,7 @@ public class CashoutV2 {
         String cashoutURL = requestURL.replace("%env", this.sandbox ? "onetouch-api-sandbox" : "onetouch-api");
 
         String jsonRequest = this.buildCashoutRequest();
+        System.out.println(jsonRequest);
         String hash = null;
         try {
             hash = Hmac.toHexString(Hmac.calcHmacSha256(AstroPay.Sdk.getSecretKey().getBytes(StandardCharsets.UTF_8), jsonRequest.getBytes(StandardCharsets.UTF_8)));
@@ -114,7 +115,7 @@ public class CashoutV2 {
             cashoutV2Request.security.on_hold_confirmation_url = security.onHoldConfirmationUrl;
         }
 
-        return gson.toJson(cashoutV2Request, CashoutRequest.class);
+        return gson.toJson(cashoutV2Request, CashoutV2Request.class);
     }
 
     /**
