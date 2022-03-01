@@ -75,7 +75,6 @@ public class CashoutV1 {
         } else {
             AstroPay.Sdk.OnCashoutV1Success(cashoutV1Response);
         }
-
     }
 
     private String buildCashoutRequest() {

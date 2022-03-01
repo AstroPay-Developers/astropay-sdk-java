@@ -1,9 +1,6 @@
 package com.astropay;
 
-import com.astropay.resources.CashoutV1Response;
-import com.astropay.resources.CashoutV1ResultListener;
-import com.astropay.resources.DepositResponse;
-import com.astropay.resources.DepositResultListener;
+import com.astropay.resources.*;
 import com.google.gson.Gson;
 
 import java.net.URI;
@@ -24,9 +21,10 @@ public class AstroPay {
         private static final String depositURL = "https://%env.astropay.com/merchant/v1/deposit/init";
         private static final String depositStatusURL = "https://%env.astropay.com/merchant/v1/deposit/%deposit_external_id/status";
         private static final String cashoutV1StatusURL = "https://%env.astropay.com/merchant/v1/cashout/%cashout_id/status";
-        private static final String cashoutV2StatusURL = "https://%env.astropay.com/merchant/v2/cashout/%cashout_external_id%/status";
+        private static final String cashoutV2StatusURL = "https://%env.astropay.com/merchant/v2/cashout/%cashout_external_id/status";
         private static DepositResultListener depositResultListener;
         private static CashoutV1ResultListener cashoutV1ResultListener;
+        private static CashoutV2ResultListener cashoutV2ResultListener;
 
         public static void setSandboxMode(Boolean sandboxMode) {
             Sdk.sandboxMode = sandboxMode;
@@ -176,5 +174,60 @@ public class AstroPay {
         }
 
         //endregion cashoutv1
+
+        // region CashoutV2
+
+        public static void OnCashoutV2StatusResult(CashoutV2Response result) {
+            if (cashoutV2ResultListener != null) {
+                cashoutV2ResultListener.OnCashoutStatusResult(result);
+            }
+        }
+
+        public static void OnCashoutV2Error(CashoutV2Response result) {
+            if (cashoutV2ResultListener != null) {
+                cashoutV2ResultListener.OnCashoutError(result);
+            }
+        }
+
+        public static void OnCashoutV2Success(CashoutV2Response result) {
+            if (cashoutV2ResultListener != null) {
+                cashoutV2ResultListener.OnCashoutSuccess(result);
+            }
+        }
+
+        /**
+         * Register listener
+         *
+         * @param mListener CashoutV2 Result Listener
+         */
+        public static void registerCashoutV2ResultEventListener(CashoutV2ResultListener mListener) {
+            cashoutV2ResultListener = mListener;
+        }
+
+        /**
+         * Checking Cashout Status
+         * If necessary, you can manually check a cashout status with this endpoint. Please note this is not required as a callback with the final status will be sent within 24h.
+         *
+         * @param cashout_external_id Cashout external ID
+         */
+        public static void checkCashoutV2Status(String cashout_external_id) {
+            String statusURL = AstroPay.Sdk.getCashoutV2StatusURL();
+            statusURL = statusURL.replace("%cashout_external_id", cashout_external_id);
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest get = HttpRequest.newBuilder().uri(URI.create(statusURL)).timeout(Duration.ofMinutes(2)).headers("Content-Type", "application/json", "Merchant-Gateway-Api-Key", AstroPay.Sdk.getApiKey()).GET().build();
+
+            CompletableFuture<HttpResponse<String>> response = client.sendAsync(get, HttpResponse.BodyHandlers.ofString());
+
+            String result = null;
+            try {
+                result = response.thenApply(HttpResponse::body).get(5, TimeUnit.SECONDS);
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                e.printStackTrace();
+            }
+
+            Gson g = new Gson();
+            CashoutV2Response statusResponse = g.fromJson(result, CashoutV2Response.class);
+            cashoutV2ResultListener.OnCashoutStatusResult(statusResponse);
+        }
     }
 }

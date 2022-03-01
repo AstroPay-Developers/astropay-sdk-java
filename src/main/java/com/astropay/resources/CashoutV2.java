@@ -141,7 +141,7 @@ public class CashoutV2 {
         Gson g = new Gson();
         CashoutV2Response statusResponse = g.fromJson(result, CashoutV2Response.class);
 
-        cashoutResultListener.OnCashoutStatusResult(statusResponse);
+        AstroPay.Sdk.OnCashoutV2StatusResult(statusResponse);
     }
 
     public void setSandbox(boolean sandbox) {
