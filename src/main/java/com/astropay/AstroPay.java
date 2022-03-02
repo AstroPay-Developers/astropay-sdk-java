@@ -1,12 +1,13 @@
 package com.astropay;
 
 import com.astropay.resources.*;
+import com.astropay.utils.Hmac;
 import com.google.gson.Gson;
-
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -22,6 +23,7 @@ public class AstroPay {
         private static final String depositStatusURL = "https://%env.astropay.com/merchant/v1/deposit/%deposit_external_id/status";
         private static final String cashoutV1StatusURL = "https://%env.astropay.com/merchant/v1/cashout/%cashout_id/status";
         private static final String cashoutV2StatusURL = "https://%env.astropay.com/merchant/v2/cashout/%cashout_external_id/status";
+        private static final String cashoutV2ConfirmURL = "https://%env.astropay.com/merchant/v2/cashout/onHoldConfirmation";
         private static DepositResultListener depositResultListener;
         private static CashoutV1ResultListener cashoutV1ResultListener;
         private static CashoutV2ResultListener cashoutV2ResultListener;
@@ -60,6 +62,10 @@ public class AstroPay {
 
         public static String getCashoutV2StatusURL() {
             return cashoutV2StatusURL.replace("%env", sandboxMode ? "onetouch-api-sandbox" : "onetouch-api");
+        }
+
+        public static String getCashoutV2ConfirmURL() {
+            return cashoutV2ConfirmURL.replace("%env", sandboxMode ? "onetouch-api-sandbox" : "onetouch-api");
         }
 
         //region Deposits
@@ -228,6 +234,37 @@ public class AstroPay {
             Gson g = new Gson();
             CashoutV2Response statusResponse = g.fromJson(result, CashoutV2Response.class);
             cashoutV2ResultListener.OnCashoutStatusResult(statusResponse);
+        }
+
+        /**
+         * Approve or Cancel a cashout that is on hold
+         *
+         * @param cashoutExternalId: String, approve: Boolean
+         */
+        public static int confirmCashoutOnHold(String cashoutExternalId, Boolean approve) {
+            String confirmURL = AstroPay.Sdk.getCashoutV2ConfirmURL();
+            Gson gson = new Gson();
+            ConfirmCashoutOnHoldRequest cashoutOnHoldRequest = new ConfirmCashoutOnHoldRequest();
+            cashoutOnHoldRequest.cashout_external_id = cashoutExternalId;
+            cashoutOnHoldRequest.approve = approve;
+
+            String jsonRequest = gson.toJson(cashoutOnHoldRequest, ConfirmCashoutOnHoldRequest.class);
+
+            String hash = null;
+            try {
+                hash = Hmac.toHexString(Hmac.calcHmacSha256(AstroPay.Sdk.getSecretKey().getBytes(StandardCharsets.UTF_8), jsonRequest.getBytes(StandardCharsets.UTF_8)));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder().uri(URI.create(confirmURL)).timeout(Duration.ofMinutes(2)).headers("Content-Type", "application/json", "Merchant-Gateway-Api-Key", AstroPay.Sdk.getApiKey(), "Signature", hash).POST(HttpRequest.BodyPublishers.ofString(jsonRequest)).build();
+            CompletableFuture<HttpResponse<String>> response = client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
+
+            return response.thenApply(pageResponse -> {
+                System.out.println("Page response status code: " + pageResponse.statusCode());
+                return pageResponse.statusCode();
+            }).join();
         }
     }
 }
