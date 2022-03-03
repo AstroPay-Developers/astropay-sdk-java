@@ -1,4 +1,27 @@
-# astropay-sdk-java
+# AstroPay SDK for Java
+This library provides developers with a simple set of bindings to help you integrate AstroPay API and start processing your payment with Astropay.
+
+## 💡 Requirements
+
+Java 1.7 or higher
+
+## 📲 Installation
+
+1. Append AstroPay dependencies to pom.xml
+
+``` xml
+...
+  <dependencies>
+      <dependency>
+          <groupId> com.astropay </groupId>
+          <artifactId> sdk-java </artifactId>
+          <version> 1.0.0 </version>
+      </dependency>
+  </dependencies>
+  ...
+
+```
+2. Run <code>mvn install</code> and thats all, you have AstroPay SDK installed.
 
 ## Make a Deposit  
 
@@ -56,10 +79,38 @@ public class Main {
     }
 }
 ```
-
 > If a user.user_id (user id at Astropay) is specified in the request then the "pay with different account" option will not be available in the checkout.
 
-## optional settings:
+## 📚 Documentation
+
+> **To register:** Create your Astropay Merchant account in [our site](https://merchants-stg.astropay.com/signup). 
+> **Get Credentials:** After the registration is finished you will have access to your credentials, your account configuration and your Back-Office at: https://merchants-stg.astropay.com/
+
+### User Object
+
+User additional information (optional)
+
+``` java
+user.setUserId("Astropay_User_ID");
+user.setDocument("User_Identification_Document");
+user.setDocumentType(DocumentType.CI); //CI, DNI, PASSPORT
+user.setEmail("User_email");
+user.setPhone("User_phone");
+user.setFirstName("User's_first_name");
+user.setLastName("User's_last_name");
+user.setBirthDate(DateFormat.parse("YYY-MM-AA")); //Date with format YYYY-MM-DD)
+user.setCountry(Countries.Uruguay); //String (2) ISO Code
+```
+
+### Product Object
+
+Product additional information (optional)
+
+> Contact your Account Manager or commercial@astropay.com for the MCC Code
+
+``` java
+product.setCategory("Merchant_category");
+```
 
 ### Visual Info  
 With this object you can customize how the name will be presented in the AstroPay Cashout page and in the user's wallet. You can also set a logo.
@@ -67,8 +118,24 @@ With this object you can customize how the name will be presented in the AstroPa
 If this object is not set or not included, it will be shown the Business name of your Merchant Account or, if it's not set, blank.
 
 ```java
-VisualInfo visualInfo = new VisualInfo("MERCHANT NAME", "URL-MERCHANT-LOGO");
+VisualInfo visualInfo = new VisualInfo("MERCHANT_NAME", "URL-MERCHANT-LOGO");
 ```
 
-### User Object 
+### Check deposit status
 
+Request made in order to find out the status of a deposit. The response of the request if successful will return the deposit_external_id and the status with three possible values: "PENDING", "APPROVED" or "CANCELLED".
+
+``` java
+AstroPay.Sdk.checkDepositStatus("deposit_external_id"); //deposit_external_id must be String(128)
+```
+
+### DepositResponse Object
+
+```java
+String status; //{'PENDING','APPROVED','CANCELLED'}
+String url; //URL to redirect the user
+String merchant_deposit_id; //Merchant deposit Id
+String deposit_external_id; //Astropay deposit Id	
+String error; //Error Code
+String description; //Error Description
+```
