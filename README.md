@@ -1,5 +1,9 @@
 # astropay-sdk-java
 
+## Make a Deposit  
+
+Do a deposit request for the user to pay with its preferred option.
+
 Simple usage looks like:
 ``` java
 import com.astropay.AstroPay;
@@ -52,3 +56,19 @@ public class Main {
     }
 }
 ```
+
+> If a user.user_id (user id at Astropay) is specified in the request then the "pay with different account" option will not be available in the checkout.
+
+## optional settings:
+
+### Visual Info  
+With this object you can customize how the name will be presented in the AstroPay Cashout page and in the user's wallet. You can also set a logo.
+
+If this object is not set or not included, it will be shown the Business name of your Merchant Account or, if it's not set, blank.
+
+```java
+VisualInfo visualInfo = new VisualInfo("MERCHANT NAME", "URL-MERCHANT-LOGO");
+```
+
+### User Object 
+
