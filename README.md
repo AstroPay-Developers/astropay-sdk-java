@@ -47,7 +47,7 @@ public class Main {
 
         User user = new User("exampleuser@example.com");
 
-        deposit = new Deposit(user, product);
+        Deposit deposit = new Deposit(user, product);
         deposit.setAmount(new BigDecimal("29.77"));
         deposit.setCurrency(Currencies.USD);
         deposit.setCountry(Countries.Uruguay);
@@ -55,7 +55,6 @@ public class Main {
         deposit.setCallbackUrl(callbackUrl);
 
         deposit.init();
-
 
         //result listeners
         @Override
@@ -85,6 +84,22 @@ public class Main {
 
 > **To register:** Create your Astropay Merchant account in [our site](https://merchants-stg.astropay.com/signup). 
 > **Get Credentials:** After the registration is finished you will have access to your credentials, your account configuration and your Back-Office at: https://merchants-stg.astropay.com/
+
+### Deposit Object
+
+``` java
+BigDecimal amount;
+String currency;
+String country;
+String merchantDepositId; //Unique identifier of transaction
+String depositExternalId;
+URL callbackUrl;
+URL redirectUrl; //URL to redirect the user after the deposit flow (optional)
+VisualInfo visualInfo; //Visual Info object (optional)
+Product product;
+User user;
+```
+> To be provided if the notification URL is different from the notification URL registered by the merchant. A notification will be sent at every change in deposit's status to the merchant notification URL by POST protocol. See callback for more details.
 
 ### User Object
 
@@ -131,6 +146,8 @@ AstroPay.Sdk.checkDepositStatus("deposit_external_id"); //deposit_external_id mu
 
 ### DepositResponse Object
 
+You must implement <code>DepositResultListener</code>
+
 ```java
 String status; //{'PENDING','APPROVED','CANCELLED'}
 String url; //URL to redirect the user
@@ -138,4 +155,16 @@ String merchant_deposit_id; //Merchant deposit Id
 String deposit_external_id; //Astropay deposit Id	
 String error; //Error Code
 String description; //Error Description
+```
+### Callback
+
+A callback is sent whenever the transaction status changes to APPROVED or CANCELLED
+
+``` java
+String deposit_external_id //Deposit Status
+String merchant_deposit_id //Merchant's Deposit ID	
+String deposit_user_id //Astropay User ID (optional)
+String merchant_user_id //Merchant's Deposit ID	
+String status
+end_status_date
 ```
