@@ -1,5 +1,7 @@
 # astropay-sdk-java
 
+Simple usage looks like:
+``` java
 import com.astropay.AstroPay;
 import com.astropay.exceptions.APException;
 import com.astropay.resources.*;
@@ -7,8 +9,8 @@ import com.astropay.resources.*;
 public class Main {
 
     public static void main(String[] args) {
-        AstroPay.Sdk.setSecretKey("QK6BPDCVVYR2WVNR6XWNYB2JED3XFJL6");
-        AstroPay.Sdk.setApiKey("pXW9MRon1bdzb5nt20cfmMlPACBA1LPXlaGXtJVbA30vpt8XhNATb8VK2QcirC6F");
+        AstroPay.Sdk.setSecretKey("YOUR_SECRET_KEY");
+        AstroPay.Sdk.setApiKey("YOUR_API_KEY");
         AstroPay.Sdk.registerDepositResultEventListener(this);
         AstroPay.Sdk.setSandboxMode(true); //optional, default false
 
@@ -49,3 +51,4 @@ public class Main {
         }
     }
 }
+```
