@@ -3,6 +3,7 @@ package com.astropay.resources;
 import com.astropay.AstroPay;
 import com.astropay.exceptions.APException;
 import com.astropay.utils.Hmac;
+import com.astropay.utils.SDKProperties;
 import com.google.gson.Gson;
 
 import java.math.BigDecimal;
@@ -43,7 +44,7 @@ public class Deposit {
         if (AstroPay.Sdk.getApiKey() == null || AstroPay.Sdk.getSecretKey() == null) {
             throw new APException("You must provide API-Key and Secret Key");
         }
-        String depositURL = AstroPay.Sdk.getDepositURL();
+        String depositURL = SDKProperties.getDepositURL();
         String jsonRequest = this.buildDepositRequest();
         String hash = null;
         try {
@@ -89,7 +90,7 @@ public class Deposit {
      * @param deposit_external_id Deposit external ID
      */
     public void checkDepositStatus(String deposit_external_id) {
-        String statusURL = AstroPay.Sdk.getDepositStatusURL();
+        String statusURL = SDKProperties.getDepositStatusURL();
         statusURL = statusURL.replace("%deposit_external_id", deposit_external_id);
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest get = HttpRequest.newBuilder().uri(URI.create(statusURL)).timeout(Duration.ofMinutes(2)).headers("Content-Type", "application/json", "Merchant-Gateway-Api-Key", AstroPay.Sdk.getApiKey()).GET().build();
