@@ -78,13 +78,13 @@ public class AstroPay {
         public static void checkDepositStatus(String deposit_external_id) {
             String getStatusURL = SDKProperties.getDepositStatusURL().replace("%deposit_external_id", deposit_external_id);
             HttpClient client = HttpClient.newHttpClient();
-            HttpRequest get = HttpRequest.newBuilder().uri(URI.create(getStatusURL)).timeout(Duration.ofMinutes(2)).headers("Content-Type", "application/json", "Merchant-Gateway-Api-Key", AstroPay.Sdk.getApiKey()).GET().build();
+            HttpRequest get = HttpRequest.newBuilder().uri(URI.create(getStatusURL)).timeout(Duration.ofMinutes(SDKProperties.getRequestTimeOutInMinutes())).headers("Content-Type", "application/json", "Merchant-Gateway-Api-Key", AstroPay.Sdk.getApiKey()).GET().build();
 
             CompletableFuture<HttpResponse<String>> response = client.sendAsync(get, HttpResponse.BodyHandlers.ofString());
 
             String result = null;
             try {
-                result = response.thenApply(HttpResponse::body).get(5, TimeUnit.SECONDS);
+                result = response.thenApply(HttpResponse::body).get(SDKProperties.getResponseTimeOutInSeconds(), TimeUnit.SECONDS);
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 e.printStackTrace();
             }
@@ -136,13 +136,13 @@ public class AstroPay {
             String statusURL = SDKProperties.getCashoutV1StatusURL();
             statusURL = statusURL.replace("%cashout_id", cashout_id.toString());
             HttpClient client = HttpClient.newHttpClient();
-            HttpRequest get = HttpRequest.newBuilder().uri(URI.create(statusURL)).timeout(Duration.ofMinutes(2)).headers("Content-Type", "application/json", "Merchant-Gateway-Api-Key", AstroPay.Sdk.getApiKey()).GET().build();
+            HttpRequest get = HttpRequest.newBuilder().uri(URI.create(statusURL)).timeout(Duration.ofMinutes(SDKProperties.getRequestTimeOutInMinutes())).headers("Content-Type", "application/json", "Merchant-Gateway-Api-Key", AstroPay.Sdk.getApiKey()).GET().build();
 
             CompletableFuture<HttpResponse<String>> response = client.sendAsync(get, HttpResponse.BodyHandlers.ofString());
 
             String result = null;
             try {
-                result = response.thenApply(HttpResponse::body).get(5, TimeUnit.SECONDS);
+                result = response.thenApply(HttpResponse::body).get(SDKProperties.getResponseTimeOutInSeconds(), TimeUnit.SECONDS);
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 e.printStackTrace();
             }
@@ -202,13 +202,13 @@ public class AstroPay {
             String statusURL = SDKProperties.getCashoutV2StatusURL();
             statusURL = statusURL.replace("%cashout_external_id", cashout_external_id);
             HttpClient client = HttpClient.newHttpClient();
-            HttpRequest get = HttpRequest.newBuilder().uri(URI.create(statusURL)).timeout(Duration.ofMinutes(2)).headers("Content-Type", "application/json", "Merchant-Gateway-Api-Key", AstroPay.Sdk.getApiKey()).GET().build();
+            HttpRequest get = HttpRequest.newBuilder().uri(URI.create(statusURL)).timeout(Duration.ofMinutes(SDKProperties.getRequestTimeOutInMinutes())).headers("Content-Type", "application/json", "Merchant-Gateway-Api-Key", AstroPay.Sdk.getApiKey()).GET().build();
 
             CompletableFuture<HttpResponse<String>> response = client.sendAsync(get, HttpResponse.BodyHandlers.ofString());
 
             String result = null;
             try {
-                result = response.thenApply(HttpResponse::body).get(5, TimeUnit.SECONDS);
+                result = response.thenApply(HttpResponse::body).get(SDKProperties.getResponseTimeOutInSeconds(), TimeUnit.SECONDS);
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 e.printStackTrace();
             }
@@ -240,13 +240,10 @@ public class AstroPay {
             }
 
             HttpClient client = HttpClient.newHttpClient();
-            HttpRequest request = HttpRequest.newBuilder().uri(URI.create(confirmURL)).timeout(Duration.ofMinutes(2)).headers("Content-Type", "application/json", "Merchant-Gateway-Api-Key", AstroPay.Sdk.getApiKey(), "Signature", hash).POST(HttpRequest.BodyPublishers.ofString(jsonRequest)).build();
+            HttpRequest request = HttpRequest.newBuilder().uri(URI.create(confirmURL)).timeout(Duration.ofMinutes(SDKProperties.getRequestTimeOutInMinutes())).headers("Content-Type", "application/json", "Merchant-Gateway-Api-Key", AstroPay.Sdk.getApiKey(), "Signature", hash).POST(HttpRequest.BodyPublishers.ofString(jsonRequest)).build();
             CompletableFuture<HttpResponse<String>> response = client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
 
-            return response.thenApply(pageResponse -> {
-                System.out.println("Page response status code: " + pageResponse.statusCode());
-                return pageResponse.statusCode();
-            }).join();
+            return response.thenApply(HttpResponse::statusCode).join();
         }
     }
 }

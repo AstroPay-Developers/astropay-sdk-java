@@ -13,7 +13,8 @@ public class SDKProperties {
     private static String cashoutV2RequestURL;
     private static String cashoutV2StatusURL;
     private static String cashoutV2ConfirmURL;
-
+    private static Integer requestTimeOutInMinutes;
+    private static Integer responseTimeOutInSeconds;
 
     public SDKProperties() {
         Properties properties = new Properties();
@@ -26,6 +27,8 @@ public class SDKProperties {
             cashoutV2RequestURL = properties.getProperty("cashoutV2RequestURL");
             cashoutV2StatusURL = properties.getProperty("cashoutV2StatusURL");
             cashoutV2ConfirmURL = properties.getProperty("cashoutV2ConfirmURL");
+            requestTimeOutInMinutes = Integer.valueOf(properties.getProperty("requestTimeOutInMinutes"));
+            responseTimeOutInSeconds = Integer.valueOf(properties.getProperty("responseTimeOutInSeconds"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -61,5 +64,13 @@ public class SDKProperties {
 
     private static String replaceEnvironment(String url) {
         return url.replace("%env", AstroPay.Sdk.getSandboxMode() ? "onetouch-api-sandbox" : "onetouch-api");
+    }
+
+    public static Integer getRequestTimeOutInMinutes() {
+        return requestTimeOutInMinutes;
+    }
+
+    public static Integer getResponseTimeOutInSeconds() {
+        return responseTimeOutInSeconds;
     }
 }

@@ -61,7 +61,7 @@ public class Deposit {
 
         String result = null;
         try {
-            result = response.thenApply(HttpResponse::body).get(5, TimeUnit.SECONDS);
+            result = response.thenApply(HttpResponse::body).get(SDKProperties.getResponseTimeOutInSeconds(), TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             e.printStackTrace();
             throw new APException(this.getMerchantDepositId(), "Thread is interrupted, either before or during the activity");
@@ -93,13 +93,13 @@ public class Deposit {
         String statusURL = SDKProperties.getDepositStatusURL();
         statusURL = statusURL.replace("%deposit_external_id", deposit_external_id);
         HttpClient client = HttpClient.newHttpClient();
-        HttpRequest get = HttpRequest.newBuilder().uri(URI.create(statusURL)).timeout(Duration.ofMinutes(2)).headers("Content-Type", "application/json", "Merchant-Gateway-Api-Key", AstroPay.Sdk.getApiKey()).GET().build();
+        HttpRequest get = HttpRequest.newBuilder().uri(URI.create(statusURL)).timeout(Duration.ofMinutes(SDKProperties.getRequestTimeOutInMinutes())).headers("Content-Type", "application/json", "Merchant-Gateway-Api-Key", AstroPay.Sdk.getApiKey()).GET().build();
 
         CompletableFuture<HttpResponse<String>> response = client.sendAsync(get, HttpResponse.BodyHandlers.ofString());
 
         String result = null;
         try {
-            result = response.thenApply(HttpResponse::body).get(5, TimeUnit.SECONDS);
+            result = response.thenApply(HttpResponse::body).get(SDKProperties.getResponseTimeOutInSeconds(), TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             e.printStackTrace();
         }
