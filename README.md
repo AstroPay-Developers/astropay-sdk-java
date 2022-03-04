@@ -13,9 +13,9 @@ Java 1.7 or higher
 ...
   <dependencies>
       <dependency>
-          <groupId> com.astropay </groupId>
-          <artifactId> sdk-java </artifactId>
-          <version> 1.0.0 </version>
+          <groupId>org.astropay</groupId>
+          <artifactId>AstropaySDK</artifactId>
+          <version>1.0.0</version>
       </dependency>
   </dependencies>
   ...
@@ -161,10 +161,13 @@ String description; //Error Description
 A callback is sent whenever the transaction status changes to APPROVED or CANCELLED
 
 ``` java
-String deposit_external_id //Deposit Status
+String deposit_external_id //Astropay Deposit ID
 String merchant_deposit_id //Merchant's Deposit ID	
 String deposit_user_id //Astropay User ID (optional)
-String merchant_user_id //Merchant's Deposit ID	
-String status
-end_status_date
+String merchant_user_id //Merchant's User ID	
+String status //Deposit Status	
+Date end_status_date //Deposit end status date
 ```
+> If we can identify the user who paid the transaction we will send it to the merchant as 'deposit_user_id' for future reference.
+
+
