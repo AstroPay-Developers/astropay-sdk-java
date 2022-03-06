@@ -20,7 +20,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 public class CashoutV2 {
-    private CashoutV2ResultListener cashoutResultListener;
     private BigDecimal amount;
     private String currency;
     private String country;
@@ -42,7 +41,6 @@ public class CashoutV2 {
         String cashoutURL = SDKProperties.getCashoutV2RequestURL();
 
         String jsonRequest = this.buildCashoutRequest();
-        System.out.println(jsonRequest);
         String hash = null;
         try {
             hash = Hmac.toHexString(Hmac.calcHmacSha256(AstroPay.Sdk.getSecretKey().getBytes(StandardCharsets.UTF_8), jsonRequest.getBytes(StandardCharsets.UTF_8)));
@@ -73,13 +71,10 @@ public class CashoutV2 {
         Gson g = new Gson();
         CashoutV2Response cashoutResponse = g.fromJson(result, CashoutV2Response.class);
 
-        // check if listener is registered.
-        if (this.cashoutResultListener != null) {
-            if (cashoutResponse.getError() != null) {
-                cashoutResultListener.OnCashoutError(cashoutResponse);
-            } else {
-                cashoutResultListener.OnCashoutSuccess(cashoutResponse);
-            }
+        if (cashoutResponse.getError() != null) {
+            AstroPay.Sdk.OnCashoutV2Error(cashoutResponse);
+        } else {
+            AstroPay.Sdk.OnCashoutV2Success(cashoutResponse);
         }
     }
 
@@ -115,10 +110,6 @@ public class CashoutV2 {
         }
 
         return gson.toJson(cashoutV2Request, CashoutV2Request.class);
-    }
-
-    public void setCashoutResultListener(CashoutV2ResultListener cashoutResultListener) {
-        this.cashoutResultListener = cashoutResultListener;
     }
 
     public void setAmount(BigDecimal amount) {

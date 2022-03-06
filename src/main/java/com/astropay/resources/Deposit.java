@@ -85,32 +85,6 @@ public class Deposit {
     }
 
     /**
-     * Request made in order to find out the status of a deposit
-     *
-     * @param deposit_external_id Deposit external ID
-     */
-    public void checkDepositStatus(String deposit_external_id) {
-        String statusURL = SDKProperties.getDepositStatusURL();
-        statusURL = statusURL.replace("%deposit_external_id", deposit_external_id);
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest get = HttpRequest.newBuilder().uri(URI.create(statusURL)).timeout(Duration.ofMinutes(SDKProperties.getRequestTimeOutInMinutes())).headers("Content-Type", "application/json", "Merchant-Gateway-Api-Key", AstroPay.Sdk.getApiKey()).GET().build();
-
-        CompletableFuture<HttpResponse<String>> response = client.sendAsync(get, HttpResponse.BodyHandlers.ofString());
-
-        String result = null;
-        try {
-            result = response.thenApply(HttpResponse::body).get(SDKProperties.getResponseTimeOutInSeconds(), TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            e.printStackTrace();
-        }
-
-        Gson g = new Gson();
-        DepositResponse statusResponse = g.fromJson(result, DepositResponse.class);
-
-        AstroPay.Sdk.OnDepositStatusResult(statusResponse);
-    }
-
-    /**
      * @return merchant_deposit_id Unique identifier of transaction
      */
     public String getMerchantDepositId() {

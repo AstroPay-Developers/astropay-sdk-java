@@ -68,7 +68,6 @@ public class CashoutV1 {
         Gson g = new Gson();
         CashoutV1Response cashoutV1Response = g.fromJson(result, CashoutV1Response.class);
 
-        // check if listener is registered.
         if (cashoutV1Response.getError() != null) {
             AstroPay.Sdk.OnCashoutV1Error(cashoutV1Response);
         } else {
