@@ -170,4 +170,11 @@ Date end_status_date //Deposit end status date
 ```
 > If we can identify the user who paid the transaction we will send it to the merchant as 'deposit_user_id' for future reference.
 
+## ❤️ Support
+
+If you require technical support, please contact [support](https://astropay.com/contact/?lang=en)
+
+## 🏻 License
+
+Copyright © 2020 ASTROPAY. All rights reserved.
 
