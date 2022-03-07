@@ -5,7 +5,7 @@ This library provides developers with a simple set of bindings to help you integ
 
 Java 1.7 or higher
 
-## 📲 Installation
+## 💻 Installation
 
 1. Append AstroPay dependencies to pom.xml
 
@@ -22,6 +22,9 @@ Java 1.7 or higher
 
 ```
 2. Run <code>mvn install</code> and thats all, you have AstroPay SDK installed.
+
+> **To register:** Create your Astropay Merchant account in [our site](https://merchants-stg.astropay.com/signup). 
+> **Get Credentials:** After the registration is finished you will have access to your credentials, your account configuration and your Back-Office at: https://merchants-stg.astropay.com/
 
 ## Make a Deposit  
 
@@ -81,9 +84,6 @@ public class Main {
 > If a user.user_id (user id at Astropay) is specified in the request then the "pay with different account" option will not be available in the checkout.
 
 ## 📚 Documentation
-
-> **To register:** Create your Astropay Merchant account in [our site](https://merchants-stg.astropay.com/signup). 
-> **Get Credentials:** After the registration is finished you will have access to your credentials, your account configuration and your Back-Office at: https://merchants-stg.astropay.com/
 
 ### Deposit Object
 
