@@ -54,7 +54,7 @@ public class AstroPay {
 
         public static void OnDepositStatusResult(DepositResponse result) {
             if (depositResultListener != null) {
-                depositResultListener.OnStatusResult(result);
+                depositResultListener.OnDepositStatusResult(result);
             }
         }
 
@@ -91,7 +91,7 @@ public class AstroPay {
 
             Gson g = new Gson();
             if (depositResultListener != null) {
-                depositResultListener.OnStatusResult(g.fromJson(result, DepositResponse.class));
+                depositResultListener.OnDepositStatusResult(g.fromJson(result, DepositResponse.class));
             }
         }
 
