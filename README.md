@@ -37,14 +37,11 @@ import com.astropay.exceptions.APException;
 import com.astropay.resources.*;
 
 public class Main {
-
     public static void main(String[] args) {
         AstroPay.Sdk.setSecretKey("YOUR_SECRET_KEY");
         AstroPay.Sdk.setApiKey("YOUR_API_KEY");
-        AstroPay.Sdk.registerDepositResultEventListener(this);
+        AstroPay.Sdk.registerDepositResultEventListener(this); // your class should implements DepositResultListener
         AstroPay.Sdk.setSandboxMode(true); //optional, default false
-
-        URL callbackUrl = buildURL("https://your-callback-url");
 
         Product product = new Product("7995", "product_merchant_code", "product description");
 
@@ -55,7 +52,7 @@ public class Main {
         deposit.setCurrency(Currencies.USD);
         deposit.setCountry(Countries.Uruguay);
         deposit.setMerchantDepositId("merchant_deposit_id");
-        deposit.setCallbackUrl(callbackUrl);
+        deposit.setCallbackUrl("https://your-callback-url");
 
         deposit.init();
 
@@ -169,6 +166,103 @@ String status //Deposit Status
 Date end_status_date //Deposit end status date
 ```
 > If we can identify the user who paid the transaction we will send it to the merchant as 'deposit_user_id' for future reference.
+
+## Cashouts
+
+We currently offer two different versions of cashouts, each with their own features and way of implementation, both following almost the same requirements to the parameters.
+
+### Closed Loop Transactions
+
+If you wish to use the user_id parameter in any deposit or cashout request, you will need the AstroPay User ID. This will be included in the callback of a approved Deposit as "deposit_user_id" or a Cashout with "cashout_user_id"
+
+Keep in mind each user in AstroPay has their own unique user id, a user will never share the same ids, you should keep record of them as soon a deposit is completed.
+
+> AstroPay Users do not know their User ID.
+
+### What is Closed Loop?
+
+Closed Loop means a user in the merchant's end will only be able to request a Cashout if they have deposited previously using AstroPay.
+
+It is also possible to link a AstroPay account to a Merchant Account so only the specified one complete deposits with the parameter user_id in the request.
+
+In order to do that, check if your user while trying to cashout has their "deposit_user_id" saved and use that to request the cashout with the user_id parameter.
+
+**We highly encourage the user is made aware of this condition to cashout.**
+
+> Notice if both user_id and phone number are informed, the priority is to the user_id.
+
+### Cashout V1  
+
+As soon the request is received by Astropay, it gets validated to the corresponding account.
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        AstroPay.Sdk.setSecretKey("YOUR_SECRET_KEY");
+        AstroPay.Sdk.setApiKey("YOUR_API_KEY");
+        AstroPay.Sdk.registerCashoutV1ResultEventListener(this); // your class should implements CashoutV1ResultListener
+        AstroPay.Sdk.setSandboxMode(true); //optional, default false
+
+        User user = new User("exampleuser@example.com");
+        user.setPhone("598XXXXXXXX"); // Either user_id or phone must be specified.
+        // user.setUserId("user_id"); // for “closed-loop”
+
+        cashoutV1 = new CashoutV1(user);
+        cashoutV1.setAmount(new BigDecimal("5.99"));
+        cashoutV1.setCurrency(Currencies.USD);
+        cashoutV1.setCountry(Countries.Uruguay);
+        cashoutV1.setMerchantCashoutId("merchant_cashout_id");
+        cashoutV1.setCallbackUrl("https://your-callback-url");
+
+        cashoutV1.init();
+
+        //result listeners
+        @Override
+        public void OnCashoutSuccess(CashoutV1Response cvr) {
+            System.out.println(cvr.getCashoutId() + ", " + cvr.getStatus());
+        }
+
+        @Override
+        public void OnCashoutError(CashoutV1Response cvr) {
+            System.out.println(cvr.getError() + ", " + cvr.getDescription());
+        }
+
+        @Override
+        public void OnCashoutStatusResult(CashoutV1Response cvr) {
+            System.out.println(cvr.getCashoutId() + ", " + cvr.getStatus());
+        }
+    }
+}
+```
+
+If the cashouts is created as PENDING, it means we could not find an account with the information provided. A SMS will be sent to the phone number so the user create an account and receives his amount.
+
+> Cashouts will only stay pending for 24 hours, after that they will be cancelled and a callback sent to the specified URL
+
+### Callbacks
+
+A callback will be sent by POST protocol to the callback URL provided in the request. Callbacks are only sent when the cashout changes status from PENDING to APPROVED or CANCELLED.
+
+```java
+String cashout_id	// Astropay Cashout Id
+String merchant_cashout_id	// Merchant's cashout Id
+String cashout_user_id // Astropay User Id (optional)
+String merchant_user_id	// Merchant's user Id
+String status // Cashout status
+Date end_status_date //Deposit End status date
+```
+
+> Only 'APPROVED' cashouts will include the cashout_user_id.
+
+### Checking Cashout Status
+
+If necessary, you can manually check a cashout status
+
+> cashout_id must be an integer
+
+```java
+AstroPay.Sdk.checkCashoutV1Status(cashout_id);
+```
 
 ## ❤️ Support
 
