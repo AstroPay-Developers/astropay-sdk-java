@@ -1,6 +1,6 @@
 # AstroPay SDK for Java
 
-This library provides developers with a simple set of bindings to help you integrate AstroPay API and start processing your payment with Astropay.
+This library provides developers with a simple set of bindings to help you integrate AstroPay API and start processing your payment with AstroPay.
 
 ## 💡 Requirements
 
@@ -15,7 +15,7 @@ Java 1.7 or higher
   <dependencies>
       <dependency>
           <groupId>org.astropay</groupId>
-          <artifactId>AstropaySDK</artifactId>
+          <artifactId>AstroPaySDK</artifactId>
           <version>1.0.0</version>
       </dependency>
   </dependencies>
@@ -23,9 +23,9 @@ Java 1.7 or higher
 
 ```
 
-2. Run <code>mvn install</code> and thats all, you have AstroPay SDK installed.
+2. Run <code>mvn install</code> and that is all, you have AstroPay SDK installed.
 
-> **To register:** Create your Astropay Merchant account in [our site](https://merchants-stg.astropay.com/signup).
+> **To register:** Create your AstroPay Merchant account in [our site](https://merchants-stg.astropay.com/signup).
 > **Get Credentials:** After the registration is finished you will have access to your credentials, your account configuration and your Back-Office at: https://merchants-stg.astropay.com/
 
 ## Make a Deposit
@@ -82,23 +82,25 @@ public class Main {
 }
 ```
 
-> If a user.user_id (user id at Astropay) is specified in the request then the "pay with different account" option will not be available in the checkout.
+> If a user.user_id (user id at AstroPay) is specified in the request then the "pay with different account" option will not be available in the checkout.
 
-## 📚 Documentation
+## :mortar_board: Documentation
 
 #### Deposit object
 
 ```java
-BigDecimal amount;
-String currency;
-String country;
-String merchantDepositId; //Unique identifier of transaction
-String depositExternalId;
-URL callbackUrl;
-URL redirectUrl; //URL to redirect the user after the deposit flow (optional)
-VisualInfo visualInfo; //Visual Info object (optional)
-Product product;
-User user;
+public class Deposit {
+    BigDecimal amount;
+    String currency;
+    String country;
+    String merchantDepositId; // Unique identifier of transaction
+    String depositExternalId;
+    URL callbackUrl;
+    URL redirectUrl; // URL to redirect the user after the deposit flow (optional)
+    VisualInfo visualInfo; // Visual Info object (optional)
+    Product product;
+    User user;
+}
 ```
 
 > To be provided if the notification URL is different from the notification URL registered by the merchant. A notification will be sent at every change in deposit's status to the merchant notification URL by POST protocol. See callback for more details.
@@ -108,15 +110,15 @@ User user;
 User additional information (optional)
 
 ```java
-user.setUserId("Astropay_User_ID");
+user.setUserId("AstroPay_User_ID");
 user.setDocument("User_Identification_Document");
-user.setDocumentType(DocumentType.CI); //CI, DNI, PASSPORT
+user.setDocumentType(DocumentType.CI); // CI, DNI, PASSPORT
 user.setEmail("User_email");
 user.setPhone("User_phone");
 user.setFirstName("User's_first_name");
 user.setLastName("User's_last_name");
-user.setBirthDate("YYYY-MM-AA"); //Date with format YYYY-MM-DD)
-user.setCountry(Countries.Uruguay); //String (2) ISO Code
+user.setBirthDate("YYYY-MM-AA"); // Date with format YYYY-MM-DD)
+user.setCountry(Countries.Uruguay); // String (2) ISO Code
 ```
 
 #### Product object
@@ -144,7 +146,7 @@ VisualInfo visualInfo = new VisualInfo("MERCHANT_NAME", "URL-MERCHANT-LOGO");
 Request made in order to find out the status of a deposit. The response of the request if successful will return the deposit_external_id and the status with three possible values: "PENDING", "APPROVED" or "CANCELLED".
 
 ```java
-AstroPay.Sdk.checkDepositStatus("deposit_external_id"); //deposit_external_id must be String(128)
+AstroPay.Sdk.checkDepositStatus("deposit_external_id"); // deposit_external_id must be String(128)
 ```
 
 **OnDepositStatusResult** evet will be emitted.
@@ -154,12 +156,12 @@ AstroPay.Sdk.checkDepositStatus("deposit_external_id"); //deposit_external_id mu
 You must implement <code>DepositResultListener</code>
 
 ```java
-String status; //{'PENDING','APPROVED','CANCELLED'}
-String url; //URL to redirect the user
-String merchant_deposit_id; //Merchant deposit Id
-String deposit_external_id; //Astropay deposit Id
-String error; //Error Code
-String description; //Error Description
+String status; // {'PENDING','APPROVED','CANCELLED'}
+String url; // URL to redirect the user
+String merchant_deposit_id; // Merchant deposit Id
+String deposit_external_id; // AstroPay deposit Id
+String error; // Error Code
+String description; // Error Description
 ```
 
 ### Callback
@@ -167,12 +169,12 @@ String description; //Error Description
 A callback is sent whenever the transaction status changes to APPROVED or CANCELLED
 
 ```java
-String deposit_external_id //Astropay Deposit ID
-String merchant_deposit_id //Merchant's Deposit ID
-String deposit_user_id //Astropay User ID (optional)
-String merchant_user_id //Merchant's User ID
-String status //Deposit Status
-Date end_status_date //Deposit end status date
+String deposit_external_id // AstroPay Deposit ID
+String merchant_deposit_id // Merchant's Deposit ID
+String deposit_user_id // AstroPay User ID (optional)
+String merchant_user_id // Merchant's User ID
+String status // Deposit Status
+Date end_status_date // Deposit end status date
 ```
 
 > If we can identify the user who paid the transaction we will send it to the merchant as 'deposit_user_id' for future reference.
@@ -203,7 +205,7 @@ In order to do that, check if your user while trying to cashout has their "depos
 
 ### Cashout V1
 
-As soon the request is received by Astropay, it gets validated to the corresponding account.
+As soon the request is received by AstroPay, it gets validated to the corresponding account.
 
 ```java
 public class Main {
@@ -213,7 +215,7 @@ public class Main {
         AstroPay.Sdk.registerCashoutV1ResultEventListener(this); // your class should implements CashoutV1ResultListener
         AstroPay.Sdk.setSandboxMode(true); //optional, default false
 
-        User user = new User("exampleuser@example.com"); //This parameter is meant to be a unique identifier of the user on the merchant’s side. It is very important to send the correct ID on your side in order for Astropay to run several fraud and risk controls.
+        User user = new User("exampleuser@example.com"); //This parameter is meant to be a unique identifier of the user on the merchant’s side. It is very important to send the correct ID on your side in order for AstroPay to run several fraud and risk controls.
         user.setPhone("598XXXXXXXX"); // Either user_id or phone must be specified.
         user.setUserId("user_id"); // for “closed-loop”
 
@@ -254,9 +256,9 @@ If the cashouts is created as PENDING, it means we could not find an account wit
 A callback will be sent by POST protocol to the callback URL provided in the request. Callbacks are only sent when the cashout changes status from PENDING to APPROVED or CANCELLED.
 
 ```java
-String cashout_id	// Astropay Cashout Id
+String cashout_id	// AstroPay Cashout Id
 String merchant_cashout_id	// Merchant's cashout Id
-String cashout_user_id // Astropay User Id (optional)
+String cashout_user_id // AstroPay User Id (optional)
 String merchant_user_id	// Merchant's user Id
 String status // Cashout status
 Date end_status_date //Deposit End status date
@@ -282,9 +284,9 @@ AstroPay.Sdk.checkCashoutV1Status(cashout_id);
 BigDecimal amount;
 String currency;
 String country;
-String merchantCashoutId; //Unique identifier of merchant transaction
-URL callbackUrl; //A URL where the merchant will be receiving transaction status updates. See callback for more details
-User user; //User Object
+String merchantCashoutId; // Unique identifier of merchant transaction
+URL callbackUrl; // A URL where the merchant will be receiving transaction status updates. See callback for more details
+User user; // User Object
 ```
 
 #### User object
@@ -292,15 +294,16 @@ User user; //User Object
 User additional information (optional)
 
 ```java
-user.setUserId("Astropay_User_ID");
+user.setUserId("AstroPay_User_ID");
 user.setDocument("User_Identification_Document");
-user.setDocumentType(DocumentType.CI); //CI, DNI, PASSPORT
+user.setDocumentType(DocumentType.CI); // CI, DNI, PASSPORT
 user.setEmail("User_email");
 user.setPhone("User_phone");
 user.setFirstName("User's_first_name");
 user.setLastName("User's_last_name");
-user.setBirthDate("YYYY-MM-AA"); //Date with format YYYY-MM-DD)
-user.setCountry(Countries.Uruguay); //String (2) ISO Code
+user.setBirthDate("YYYY-MM-AA"); // Date with format YYYY-MM-DD)
+user.setCountry(Countries.Uruguay); // String (2) ISO Code
+```
 
 ## Cashout V2
 
@@ -312,7 +315,7 @@ public class Main {
         AstroPay.Sdk.setSecretKey("YOUR_SECRET_KEY");
         AstroPay.Sdk.setApiKey("YOUR_API_KEY");
         AstroPay.Sdk.registerCashoutV2ResultEventListener(this); // your class should implements CashoutV2ResultListener
-        AstroPay.Sdk.setSandboxMode(true); //optional, default false
+        AstroPay.Sdk.setSandboxMode(true); // optional, default false
 
         User user = new User("exampleuser@example.com");
         user.setPhone("598XXXXXXXX"); // Either user_id or phone must be specified.
@@ -330,7 +333,7 @@ public class Main {
 
         cashoutV2.init();
 
-        //Result listeners
+        // Result listeners
         @Override
         public void OnCashoutSuccess(CashoutV2Response cashoutV2Response) {
             System.out.println(cashoutV2Response.getCashoutExternalId() + ", " + cashoutV2Response.getStatus());
@@ -364,9 +367,9 @@ String cashout_external_id;
 
 Sometimes a request won't get into one of the three status in the previous point, if the request cannot be completed, you will receive an error message. Here's an example of one.
 
-```java
-String error; //Error Code
-String description; //Error Description
+``` java
+String error; // Error Code
+String description; // Error Description
 ```
 
 > Note the error messages in this page assumes the request is made correctly. If you receive an error like UNAUTHORIZED, see Error Codes.
@@ -381,9 +384,9 @@ Add the following parameters to your cashout
 
 ```java
 CashoutOnHold cashoutOnHold = new CashoutOnHold();
-cashoutOnHold.createOnHold = true; //Enable On Hold for the request
+cashoutOnHold.createOnHold = true; // Enable On Hold for the request
 cashoutOnHold.onHoldConfirmationUrl = "https://on-hold-confirm-url";
-cashoutV2.setSecurity(cashoutOnHold); //On Hold notification URL
+cashoutV2.setSecurity(cashoutOnHold); // On Hold notification URL
 ```
 
 > on_hold_confirmation_url is required if create_on_hold is set to true.
@@ -391,7 +394,7 @@ cashoutV2.setSecurity(cashoutOnHold); //On Hold notification URL
 #### How to approve or cancel a cashout that is on hold?
 
 ```java
-int status = AstroPay.Sdk.confirmCashoutOnHold("cashout_external_id", true); //Merchant’s cashout approval/denial (true/false)
+int status = AstroPay.Sdk.confirmCashoutOnHold("cashout_external_id", true); // Merchant’s cashout approval/denial (true/false)
 JOptionPane.showMessageDialog(this, "Confirm status result: " + status);
 ```
 
@@ -411,12 +414,12 @@ AstroPay.Sdk.checkCashoutV2Status("cashout_external_id");
 
 > cashout_external_id must be a String
 
-## ❤️ Support
+## :telephone_receiver: Support
 
 If you require technical support, please contact [support](https://astropay.com/contact/?lang=en)
 
 If you want, you can check our [AstroPay OneTouch API Guide](https://developers-wallet.astropay.com/?php#getting-started-with-one-touch) for more information.
 
-## 🏻 License
+## :pencil: License
 
-Copyright © 2020 ASTROPAY. All rights reserved.
+Copyright © 2022 AstroPay. All rights reserved.
