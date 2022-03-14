@@ -46,7 +46,7 @@ public class Main {
         AstroPay.Sdk.registerDepositResultEventListener(this); // your class should implements DepositResultListener
         AstroPay.Sdk.setSandboxMode(true); //optional, default false
 
-        Product product = new Product("7995", "product_merchant_code", "product description");
+        Product product = new Product("merchant_code", "product_merchant_code", "product description");
 
         User user = new User("exampleuser@example.com");
 
@@ -86,7 +86,7 @@ public class Main {
 
 ## 📚 Documentation
 
-### Deposit Object
+#### Deposit object
 
 ```java
 BigDecimal amount;
@@ -103,7 +103,7 @@ User user;
 
 > To be provided if the notification URL is different from the notification URL registered by the merchant. A notification will be sent at every change in deposit's status to the merchant notification URL by POST protocol. See callback for more details.
 
-### User Object
+#### User object
 
 User additional information (optional)
 
@@ -115,11 +115,11 @@ user.setEmail("User_email");
 user.setPhone("User_phone");
 user.setFirstName("User's_first_name");
 user.setLastName("User's_last_name");
-user.setBirthDate(DateFormat.parse("YYY-MM-AA")); //Date with format YYYY-MM-DD)
+user.setBirthDate("YYYY-MM-AA"); //Date with format YYYY-MM-DD)
 user.setCountry(Countries.Uruguay); //String (2) ISO Code
 ```
 
-### Product Object
+#### Product object
 
 Product additional information (optional)
 
@@ -129,7 +129,7 @@ Product additional information (optional)
 product.setCategory("Merchant_category");
 ```
 
-### Visual Info
+#### Visual Info
 
 With this object you can customize how the name will be presented in the AstroPay Cashout page and in the user's wallet. You can also set a logo.
 
@@ -149,7 +149,7 @@ AstroPay.Sdk.checkDepositStatus("deposit_external_id"); //deposit_external_id mu
 
 **OnDepositStatusResult** evet will be emitted.
 
-### DepositResponse Object
+#### DepositResponse object
 
 You must implement <code>DepositResultListener</code>
 
@@ -213,11 +213,11 @@ public class Main {
         AstroPay.Sdk.registerCashoutV1ResultEventListener(this); // your class should implements CashoutV1ResultListener
         AstroPay.Sdk.setSandboxMode(true); //optional, default false
 
-        User user = new User("exampleuser@example.com");
+        User user = new User("exampleuser@example.com"); //This parameter is meant to be a unique identifier of the user on the merchant’s side. It is very important to send the correct ID on your side in order for Astropay to run several fraud and risk controls.
         user.setPhone("598XXXXXXXX"); // Either user_id or phone must be specified.
         user.setUserId("user_id"); // for “closed-loop”
 
-        cashoutV1 = new CashoutV1(user);
+        CashoutV1 cashoutV1 = new CashoutV1(user);
         cashoutV1.setAmount(new BigDecimal("5.99"));
         cashoutV1.setCurrency(Currencies.USD);
         cashoutV1.setCountry(Countries.Uruguay);
@@ -276,6 +276,32 @@ AstroPay.Sdk.checkCashoutV1Status(cashout_id);
 
 **OnCashoutStatusResult** evet will be emitted.
 
+#### Cashout object
+
+```java
+BigDecimal amount;
+String currency;
+String country;
+String merchantCashoutId; //Unique identifier of merchant transaction
+URL callbackUrl; //A URL where the merchant will be receiving transaction status updates. See callback for more details
+User user; //User Object
+```
+
+#### User object
+
+User additional information (optional)
+
+```java
+user.setUserId("Astropay_User_ID");
+user.setDocument("User_Identification_Document");
+user.setDocumentType(DocumentType.CI); //CI, DNI, PASSPORT
+user.setEmail("User_email");
+user.setPhone("User_phone");
+user.setFirstName("User's_first_name");
+user.setLastName("User's_last_name");
+user.setBirthDate("YYYY-MM-AA"); //Date with format YYYY-MM-DD)
+user.setCountry(Countries.Uruguay); //String (2) ISO Code
+
 ## Cashout V2
 
 The user must be redirected similar to the Deposit flow, authenticate and complete the transaction. This version of cashouts also provides additional security features such as On Hold cashouts
@@ -290,9 +316,9 @@ public class Main {
 
         User user = new User("exampleuser@example.com");
         user.setPhone("598XXXXXXXX"); // Either user_id or phone must be specified.
-        // user.setUserId("user_id"); // for “closed-loop”
+        user.setUserId("user_id"); // for “closed-loop”
 
-        cashoutV2 = new CashoutV2(user);
+        CashoutV2 cashoutV2 = new CashoutV2(user);
         cashoutV2.setAmount(new BigDecimal("2.99"));
         cashoutV2.setCurrency(Currencies.USD);
         cashoutV2.setCountry(Countries.Uruguay);
@@ -333,13 +359,14 @@ String url;
 String merchant_cashout_id;
 String cashout_external_id;
 ```
+
 ### Error message
 
 Sometimes a request won't get into one of the three status in the previous point, if the request cannot be completed, you will receive an error message. Here's an example of one.
 
 ```java
 String error; //Error Code
-String description; //Error Description	
+String description; //Error Description
 ```
 
 > Note the error messages in this page assumes the request is made correctly. If you receive an error like UNAUTHORIZED, see Error Codes.
@@ -354,7 +381,7 @@ Add the following parameters to your cashout
 
 ```java
 CashoutOnHold cashoutOnHold = new CashoutOnHold();
-cashoutOnHold.createOnHold = true; //Enable On Hold for the request	
+cashoutOnHold.createOnHold = true; //Enable On Hold for the request
 cashoutOnHold.onHoldConfirmationUrl = "https://on-hold-confirm-url";
 cashoutV2.setSecurity(cashoutOnHold); //On Hold notification URL
 ```
@@ -372,7 +399,7 @@ JOptionPane.showMessageDialog(this, "Confirm status result: " + status);
 
 > After the merchant approves or cancel a cashout, a notification with the final status will be sent to the merchant's callback URL.
 
-### Checking Cashout Status 
+### Checking Cashout Status
 
 If necessary, you can manually check a cashout status. Please note this is not required as a callback with the final status will be sent within 24h.
 
